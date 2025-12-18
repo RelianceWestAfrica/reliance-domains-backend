@@ -20,17 +20,19 @@ export default class CountriesController {
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createCountryValidator)
 
-    // On empêche les doublons sur iso2
-    const existing = await Country.findBy('iso2', payload.iso2)
-    if (existing) {
-      return response.conflict({
-        message: 'Un pays avec ce code ISO2 existe déjà',
-      })
-    }
+    // On empêche les doublons sur iso_2
+    // const existing = await Country.query().where("iso_2", payload.iso_2).first()
+    //
+    // console.log(existing)
+    // if (existing) {
+    //   return response.conflict({
+    //     message: 'Un pays avec ce code iso_2 existe déjà',
+    //   })
+    // }
 
     const country = await Country.create({
       name: payload.name,
-      iso2: payload.iso2,
+      iso_2: payload.iso_2,
       phoneCode: payload.phoneCode,
       flagEmoji: payload.flagEmoji ?? null,
     })
@@ -55,19 +57,19 @@ export default class CountriesController {
     const country = await Country.findOrFail(params.id)
     const payload = await request.validateUsing(updateCountryValidator)
 
-    // si iso2 changé, vérifier l'unicité
-    if (payload.iso2 && payload.iso2 !== country.iso2) {
-      const exists = await Country.findBy('iso2', payload.iso2)
+    // si iso_2 changé, vérifier l'unicité
+    if (payload.iso_2 && payload.iso_2 !== country.iso_2) {
+      const exists = await Country.findBy('iso_2', payload.iso_2)
       if (exists) {
         return response.conflict({
-          message: 'Un pays avec ce code ISO2 existe déjà',
+          message: 'Un pays avec ce code iso_2 existe déjà',
         })
       }
     }
 
     country.merge({
       name: payload.name ?? country.name,
-      iso2: payload.iso2 ?? country.iso2,
+      iso_2: payload.iso_2 ?? country.iso_2,
       phoneCode: payload.phoneCode ?? country.phoneCode,
       flagEmoji: payload.flagEmoji ?? country.flagEmoji,
     })

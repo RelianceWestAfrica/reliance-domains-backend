@@ -9,7 +9,7 @@ export default class extends BaseSchema {
       table.increments('id')
 
       table.string('name').notNullable()
-      table.string('iso2', 2).notNullable().unique()
+      table.string('iso_2', 2).notNullable().unique()
       table.string('phone_code').notNullable()
       table.string('flag_emoji').nullable()
 

@@ -45,7 +45,7 @@ export default class ProjectsController {
       status: payload.status ?? 'DRAFT',
       city: payload.city,
       countryId: payload.countryId,
-      heroImageUrl: payload.heroImageUrl ?? null,
+      heroImageUrl: payload.heroImageUrl,
       residencesCount: payload.residencesCount ?? 0,
       propertiesCount: payload.propertiesCount ?? 0,
     })

@@ -2,33 +2,39 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { DateTime } from 'luxon'
-import {accessCodeValidator, loginValidator, registerValidator} from "#validators/user";
+import { loginValidator, registerValidator } from '#validators/user'
+import hash from "@adonisjs/core/services/hash";
 
 export default class AuthController {
   /**
-   * POST /auth/register
+   * POST /api/auth/register
    */
   async register({ request, response }: HttpContext) {
     const payload = await request.validateUsing(registerValidator)
 
-    const existing = await User.findBy('email', payload.email)
-    if (existing) {
+    // Vérifier si l'email existe déjà
+    const existingUser = await User.query().where('email', payload.email).first()
+    if (existingUser) {
       return response.conflict({
-        message: 'Email déjà utilisé',
+        message: 'Cet email est déjà utilisé.',
       })
     }
 
+    // Création de l'utilisateur
     const user = await User.create({
-      email: payload.email,
+      email: payload.email.toLowerCase().trim(),
       password: payload.password,
-      firstName: payload.firstName ?? null,
-      lastName: payload.lastName ?? null,
-      role: (payload.role ?? 'COMMERCIAL') as any,
+      firstName: payload.firstName?.trim() || null,
+      lastName: payload.lastName?.trim() || null,
+      role: payload.role ?? 'COMMERCIAL',
       isActive: true,
       accessCode: payload.accessCode ?? null,
     })
 
-    const token = await User.accessTokens.create(user)
+    // Génération du token API
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '30 days', // Optionnel : durée personnalisée
+    })
 
     return response.created({
       user: {
@@ -39,86 +45,97 @@ export default class AuthController {
         role: user.role,
       },
       token: {
-        type: 'bearer',
-        value: token.value!.release(), // valeur à renvoyer au front
-        expiresAt: token.expiresAt,
+        type: 'bearer' as const,
+        value: token.value!.release(), // Libère le token pour l'envoi
+        expiresAt: token.expiresAt?.toISOString(),
       },
     })
   }
 
   /**
-   * POST /auth/login
-   * (email + password)
+   * POST /api/auth/login
    */
   async login({ request, response }: HttpContext) {
-    const { email, password } = await request.validateUsing(loginValidator)
+    const { email } = await request.validateUsing(loginValidator)
 
-    try {
-      // fournie par withAuthFinder
-      const user = await User.verifyCredentials(email, password)
+    // @ts-ignore
+    const user: User = await User.query().where('email', email).first()
 
-      if (!user.isActive) {
-        return response.unauthorized({ message: 'Compte désactivé' })
-      }
+    let pass = await User.hashPassword(user);
+    console.log(user)
+    console.log(pass)
 
-      user.lastLoginAt = DateTime.now()
-      await user.save()
-
-      const token = await User.accessTokens.create(user)
-
-      return {
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-        },
-        token: {
-          type: 'bearer',
-          value: token.value!.release(),
-          expiresAt: token.expiresAt,
-        },
-      }
-    } catch {
-      return response.unauthorized({
-        message: 'Identifiants invalides',
-      })
+    if (pass !== user.password) {
+      return response.unauthorized({message: 'Mot de passe incorrect'})
     }
+
+    // Vérifications post-auth
+    if (!user.isActive) {
+      return response.forbidden({ message: 'Votre compte est désactivé.' })
+    }
+
+    // Mise à jour de la dernière connexion
+    user.lastLoginAt = DateTime.now()
+    await user.save()
+
+    // Création du token
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '30 days',
+    })
+
+    return response.ok({
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      },
+      token: {
+        type: 'bearer' as const,
+        value: token.value!.release(),
+        expiresAt: token.expiresAt?.toISOString(),
+      },
+    })
   }
 
   /**
-   * GET /auth/me
-   * nécessite Authorization: Bearer <token>
+   * GET /api/auth/me
    */
-  async me({ auth }: HttpContext) {
-    const user = await auth.authenticate() // utilise le guard par défaut (api)
+  async me({ auth, response }: HttpContext) {
+    await auth.authenticate() // Charge l'utilisateur via le guard API
 
-    return {
+    const user = auth.user!
+
+    return response.ok({
       id: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
-    }
+      isActive: user.isActive,
+      lastLoginAt: user.lastLoginAt?.toISO(),
+    })
   }
 
   /**
-   * POST /auth/logout
-   * supprime le token courant
+   * POST /api/auth/logout
    */
   async logout({ auth, response }: HttpContext) {
-    const user = await auth.getUserOrFail()
-    const tokenId = user.currentAccessToken?.identifier
+    const user = auth.user!
+
+    // Récupère le token courant
+    const tokenId = auth.authenticationAttempt?.token?.identifier
 
     if (!tokenId) {
-      return response.badRequest({ message: 'Token introuvable' })
+      return response.badRequest({ message: 'Aucun token actif trouvé.' })
     }
 
-    await User.accessTokens.delete(user, tokenId) // pattern validé par la team Adonis :contentReference[oaicite:1]{index=1}
+    // Suppression du token spécifique (meilleure pratique)
+    await User.accessTokens.delete(user, tokenId)
 
-    return {
-      message: 'Déconnexion réussie',
-    }
+    return response.ok({
+      message: 'Déconnexion réussie.',
+    })
   }
 }

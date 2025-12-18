@@ -1,8 +1,6 @@
-// app/controllers/access_code_controller.ts
 import type { HttpContext } from '@adonisjs/core/http'
-import User from '#models/user'
-import { DateTime } from 'luxon'
 import {accessCodeValidator} from "#validators/user";
+import AccessCode from "#models/access_code";
 
 export default class AccessCodeController {
   /**
@@ -12,7 +10,7 @@ export default class AccessCodeController {
   async login({ request, response }: HttpContext) {
     const { code } = await request.validateUsing(accessCodeValidator)
 
-    const user = await User.query().where('access_code', code).first()
+    const user = await AccessCode.query().where('code', code).first()
 
     if (!user || !user.isActive) {
       return response.unauthorized({
@@ -20,24 +18,14 @@ export default class AccessCodeController {
       })
     }
 
-    user.lastLoginAt = DateTime.now()
-    await user.save()
+    // user.lastLoginAt = DateTime.now()
+    // await user.save()
 
-    const token = await User.accessTokens.create(user)
+    // const token = await User.accessTokens.create(user)
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-      },
-      token: {
-        type: 'bearer',
-        value: token.value!.release(),
-        expiresAt: token.expiresAt,
-      },
+      data: user,
+      status: true,
     }
   }
 }

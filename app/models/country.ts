@@ -10,7 +10,7 @@ export default class Country extends BaseModel {
   declare name: string
 
   @column()
-  declare iso2: string
+  declare iso_2: string
 
   @column()
   declare phoneCode: string

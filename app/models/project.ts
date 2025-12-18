@@ -1,9 +1,8 @@
 // app/models/project.ts
-import {BaseModel, belongsTo, column, hasMany} from '@adonisjs/lucid/orm'
+import {BaseModel, belongsTo, column} from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import Country from '#models/country'
-import type {BelongsTo, HasMany} from '@adonisjs/lucid/types/relations'
-import ProjectImage from "#models/project_image";
+import type {BelongsTo} from '@adonisjs/lucid/types/relations'
 
 export default class Project extends BaseModel {
   @column({ isPrimary: true })
@@ -30,8 +29,8 @@ export default class Project extends BaseModel {
   @belongsTo(() => Country)
   declare country: BelongsTo<typeof Country>
 
-  @hasMany(() => ProjectImage)
-  declare images: HasMany<typeof ProjectImage>
+  @column()
+  declare heroImageUrl: string
 
   @column({ columnName: 'residences_count' })
   declare residencesCount: number

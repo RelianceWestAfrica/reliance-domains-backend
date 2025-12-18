@@ -56,5 +56,7 @@ class User extends compose(BaseModel, AuthFinder) {
     if (user.$dirty.password) {
       user.password = await hash.use('scrypt').make(user.password)
     }
+
+    return user.password
   }
 }
