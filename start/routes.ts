@@ -10,6 +10,7 @@ import ProjectImagesController from "#controllers/project_images_controller";
 import ResidencesController from "#controllers/residences_controller";
 import ResidenceFloorsController from "#controllers/residence_floors_controller";
 import PropertiesController from "#controllers/properties_controller";
+import ClientsController from "#controllers/clients_controller";
 
 /**
  * Petit endpoint de test
@@ -133,3 +134,12 @@ router
   })
   .prefix('/api/properties')
   .use(middleware.auth())
+
+router.group(() => {
+  router.get('/', [ClientsController, 'index'])      // liste + filtres
+  router.post('/', [ClientsController, 'store'])     // création
+  router.get('/:id', [ClientsController, 'show'])    // détail
+  router.put('/:id', [ClientsController, 'update'])  // mise à jour
+  router.delete('/:id', [ClientsController, 'destroy'])
+}).prefix('api/clients').use(middleware.auth())
+
