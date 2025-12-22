@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env   # mettez vos variables prod ici
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3305
+    ports:
+      - "3305:3305"
+#    depends_on:
+    # Décommentez si vous utilisez Postgres/Redis
+    # - db
+    restart: unless-stopped
+
+  # Base Postgres (optionnelle)
+  # db:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_DB: app
+  #     POSTGRES_USER: app
+  #     POSTGRES_PASSWORD: app
+  #   volumes:
+  #     - dbdata:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   dbdata:
