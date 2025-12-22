@@ -22,4 +22,4 @@ ENV NODE_ENV=development
 EXPOSE 3305
 
 # Commande de démarrage
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]
