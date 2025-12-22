@@ -13,9 +13,9 @@ services:
       PORT: 3305
     ports:
       - "3305:3305"
-    depends_on:
+#    depends_on:
     # Décommentez si vous utilisez Postgres/Redis
-     - db
+#     - db
     restart: unless-stopped
 
   # Base Postgres (optionnelle)
