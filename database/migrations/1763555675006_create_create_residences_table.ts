@@ -15,11 +15,11 @@ export default class extends BaseSchema {
         .defaultTo('IMMEUBLE')
 
       table
-        .integer('project_id')
+        .integer('domain_id')
         .unsigned()
         .notNullable()
         .references('id')
-        .inTable('projects')
+        .inTable('domains')
         .onDelete('CASCADE')
 
       table.text('description').notNullable()

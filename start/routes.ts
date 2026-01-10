@@ -11,6 +11,7 @@ import ResidencesController from "#controllers/residences_controller";
 import ResidenceFloorsController from "#controllers/residence_floors_controller";
 import PropertiesController from "#controllers/properties_controller";
 import ClientsController from "#controllers/clients_controller";
+import DomainsController from "#controllers/domains_controller";
 
 /**
  * Petit endpoint de test
@@ -142,4 +143,13 @@ router.group(() => {
   router.put('/:id', [ClientsController, 'update'])  // mise à jour
   router.delete('/:id', [ClientsController, 'destroy'])
 }).prefix('api/clients').use(middleware.auth())
+
+router.group(() => {
+  router.get('/', [DomainsController, 'index'])
+  router.post('/', [DomainsController, 'store'])
+  router.get('/:id', [DomainsController, 'show'])
+  router.put('/:id', [DomainsController, 'update'])
+  router.delete('/:id', [DomainsController, 'destroy'])
+}).prefix('api/domains')
+
 

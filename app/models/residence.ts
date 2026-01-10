@@ -1,8 +1,8 @@
 // app/models/residence.ts
 import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
-import Project from '#models/project'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import Domain from "#models/domain";
 
 export default class Residence extends BaseModel {
   @column({ isPrimary: true })
@@ -14,11 +14,11 @@ export default class Residence extends BaseModel {
   @column()
   declare type: 'IMMEUBLE' | 'VILLAS' | 'AUTRE'
 
-  @column({ columnName: 'project_id' })
-  declare projectId: number
+  @column()
+  declare domainId: number
 
-  @belongsTo(() => Project)
-  declare project: BelongsTo<typeof Project>
+  @belongsTo(() => Domain)
+  declare domain: BelongsTo<typeof Domain>
 
   @column()
   declare description: string
