@@ -118,6 +118,15 @@ export default class AuthController {
   }
 
   /**
+   * GET /api/auth/user/list
+   */
+  async usersList({ }: HttpContext) {
+    const users = User.query().orderBy('id', 'asc')
+
+    return users
+  }
+
+  /**
    * POST /api/auth/logout
    */
   async logout({ auth, response }: HttpContext) {

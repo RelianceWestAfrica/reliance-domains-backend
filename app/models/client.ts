@@ -1,30 +1,30 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 
 export default class Client extends BaseModel {
-  @column({ isPrimary: true })
-  public id: number
+  @column({isPrimary: true})
+  public id!: number
 
   @column()
-  public firstName: string
+  public firstName!: string
 
   @column()
-  public lastName: string
+  public lastName!: string
 
   @column()
-  public gender: 'Homme' | 'Femme'
+  public gender!: 'Homme' | 'Femme'
 
   @column()
-  public phone: string
+  public phone!: string
 
   @column()
-  public email: string
+  public email!: string
 
   @column()
-  public address: string
+  public address!: string
 
   @column()
-  public nationality: string
+  public nationality!: string
 
   @column()
-  public acquisitions: number
+  public acquisitions!: number
 }

@@ -9,7 +9,7 @@ import {
 export default class ResidencesController {
   /**
    * GET /api/residences
-   * Filtres : ?q=texte&projectId=1&type=IMMEUBLE&status=PUBLISHED
+   * Filtres : ?q=texte&hId=1&type=IMMEUBLE&status=PUBLISHED
    */
   async index({ request }: HttpContext) {
     const { q, domainId, type, status } = request.qs()
