@@ -6,7 +6,9 @@ export const createPropertyValidator = vine.compile(
     title: vine.string().trim().minLength(3),
     type: vine.enum(['APARTMENT', 'VILLA', 'SHOP', 'OFFICE', 'OTHER'] as const),
 
-    residenceId: vine.number().positive(),
+    projectId: vine.number().positive(),
+
+    residenceId: vine.number().positive().optional(),
 
     status: vine.enum(
       ['AVAILABLE', 'UNDER_DISCUSSION', 'RESERVED', 'SOLD'] as const
@@ -31,6 +33,8 @@ export const updatePropertyValidator = vine.compile(
   vine.object({
     title: vine.string().trim().minLength(3).optional(),
     type: vine.enum(['APARTMENT', 'VILLA', 'SHOP', 'OFFICE', 'OTHER'] as const).optional(),
+    
+    projectId: vine.number().positive().optional(),
 
     residenceId: vine.number().positive().optional(),
 

@@ -3,6 +3,7 @@ import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import Residence from '#models/residence'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import Project from './project.js'
 
 export default class Property extends BaseModel {
   @column({ isPrimary: true })
@@ -14,8 +15,14 @@ export default class Property extends BaseModel {
   @column()
   declare type: 'APARTMENT' | 'VILLA' | 'SHOP' | 'OFFICE' | 'OTHER'
 
+  @column({ columnName: 'project_id' })
+  declare projectId: number
+
+  @belongsTo(() => Project)
+  declare project: BelongsTo<typeof Project>
+
   @column({ columnName: 'residence_id' })
-  declare residenceId: number
+  declare residenceId: number | null
 
   @belongsTo(() => Residence)
   declare residence: BelongsTo<typeof Residence>

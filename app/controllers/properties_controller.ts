@@ -2,6 +2,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Property from '#models/property'
 import Residence from '#models/residence'
+import Project from '#models/project'
+
 import {
   createPropertyValidator,
   updatePropertyValidator,
@@ -17,6 +19,7 @@ export default class PropertiesController {
       q,
       type,
       status,
+      projectId,
       residenceId,
       minPrice,
       maxPrice,
@@ -25,6 +28,7 @@ export default class PropertiesController {
     } = request.qs()
 
     const query = Property.query()
+      .preload('project')
       .preload('residence')
       .orderBy('created_at', 'desc')
 
@@ -38,6 +42,10 @@ export default class PropertiesController {
 
     if (status) {
       query.where('status', status)
+    }
+
+    if (projectId) {
+      query.where('project_id', Number(projectId))
     }
 
     if (residenceId) {
@@ -69,15 +77,19 @@ export default class PropertiesController {
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createPropertyValidator)
 
-    // 1) contrôler que la résidence existe
+    // 1) contrôler que le projet existe
+    await Project.findOrFail(payload.projectId)
+
+    // 2) contrôler que la résidence existe
     await Residence.findOrFail(payload.residenceId)
 
-    // 2) préparer les flags
+    // 3) préparer les flags
     const isPublished = payload.publish ?? false
 
     const property = await Property.create({
       title: payload.title,
       type: payload.type,
+      projectId: payload.projectId,
       residenceId: payload.residenceId,
       status: payload.status,
       roomsCount: payload.roomsCount,
@@ -90,6 +102,8 @@ export default class PropertiesController {
       isPublished,
     })
 
+    await property.load('project')
+
     await property.load('residence')
 
     return response.created(property)
@@ -101,6 +115,7 @@ export default class PropertiesController {
   async show({ params }: HttpContext) {
     const property = await Property.query()
       .where('id', params.id)
+      .preload('project')
       .preload('residence')
       .firstOrFail()
 
@@ -121,6 +136,7 @@ export default class PropertiesController {
     property.merge({
       title: payload.title ?? property.title,
       type: payload.type ?? property.type,
+      projectId: payload.projectId ?? property.projectId,
       residenceId: payload.residenceId ?? property.residenceId,
       status: payload.status ?? property.status,
       roomsCount: payload.roomsCount ?? property.roomsCount,
@@ -134,6 +150,7 @@ export default class PropertiesController {
     })
 
     await property.save()
+    await property.load('project')
     await property.load('residence')
 
     return response.ok(property)
