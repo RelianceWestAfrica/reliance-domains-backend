@@ -23,6 +23,12 @@ export default class Project extends BaseModel {
   @column()
   declare city: string
 
+  @column()
+  declare entreprise: string | null
+
+  @column()
+  declare adresse: string | null
+
   @column({ columnName: 'country_id' })
   declare countryId: number
 

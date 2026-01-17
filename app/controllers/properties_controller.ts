@@ -6,6 +6,8 @@ import {
   createPropertyValidator,
   updatePropertyValidator,
 } from '#validators/property'
+import Project from "#models/project";
+import ResidenceFloor from "#models/residence_floor";
 
 export default class PropertiesController {
   /**
@@ -69,28 +71,41 @@ export default class PropertiesController {
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createPropertyValidator)
 
-    // 1) contrôler que la résidence existe
-    await Residence.findOrFail(payload.residenceId)
+    // FK obligatoires
+    await Project.findOrFail(payload.projectId)
 
-    // 2) préparer les flags
-    const isPublished = payload.publish ?? false
+    // FK optionnelles
+    if (payload.residenceId) {
+      await Residence.findOrFail(payload.residenceId)
+    }
+
+    if (payload.residenceFloorId) {
+      await ResidenceFloor.findOrFail(payload.residenceFloorId)
+    }
 
     const property = await Property.create({
       title: payload.title,
       type: payload.type,
-      residenceId: payload.residenceId,
+      projectId: payload.projectId,
+      residenceId: payload.residenceId ?? null,
+      residenceFloorId: payload.residenceFloorId ?? null,
       status: payload.status,
       roomsCount: payload.roomsCount,
       kitchensCount: payload.kitchensCount,
       surface: payload.surface,
       price: payload.price,
       imageUrl: payload.imageUrl ?? null,
+      imagePlan: payload.imagePlan ?? null,
       hasBalcony: payload.hasBalcony ?? false,
       isFurnished: payload.isFurnished ?? false,
-      isPublished,
+      isPublished: payload.publish ?? false,
     })
 
-    await property.load('residence')
+    await property.load((loader) => {
+      loader.load('residence')
+      loader.load('residenceFloor')
+      loader.load('project')
+    })
 
     return response.created(property)
   }
@@ -99,13 +114,14 @@ export default class PropertiesController {
    * GET /api/properties/:id
    */
   async show({ params }: HttpContext) {
-    const property = await Property.query()
+    return await Property.query()
       .where('id', params.id)
       .preload('residence')
+      .preload('residenceFloor')
+      .preload('project')
       .firstOrFail()
-
-    return property
   }
+
 
   /**
    * PUT /api/properties/:id
@@ -114,30 +130,47 @@ export default class PropertiesController {
     const property = await Property.findOrFail(params.id)
     const payload = await request.validateUsing(updatePropertyValidator)
 
+    if (payload.projectId) {
+      await Project.findOrFail(payload.projectId)
+    }
+
     if (payload.residenceId) {
       await Residence.findOrFail(payload.residenceId)
     }
 
+    if (payload.residenceFloorId) {
+      await ResidenceFloor.findOrFail(payload.residenceFloorId)
+    }
+
     property.merge({
-      title: payload.title ?? property.title,
-      type: payload.type ?? property.type,
-      residenceId: payload.residenceId ?? property.residenceId,
-      status: payload.status ?? property.status,
-      roomsCount: payload.roomsCount ?? property.roomsCount,
-      kitchensCount: payload.kitchensCount ?? property.kitchensCount,
-      surface: payload.surface ?? property.surface,
-      price: payload.price ?? property.price,
-      imageUrl: payload.imageUrl ?? property.imageUrl,
-      hasBalcony: payload.hasBalcony ?? property.hasBalcony,
-      isFurnished: payload.isFurnished ?? property.isFurnished,
-      isPublished: payload.isPublished ?? property.isPublished,
+      title: payload.title,
+      type: payload.type,
+      projectId: payload.projectId,
+      residenceId: payload.residenceId ?? null,
+      residenceFloorId: payload.residenceFloorId ?? null,
+      status: payload.status,
+      roomsCount: payload.roomsCount,
+      kitchensCount: payload.kitchensCount,
+      surface: payload.surface,
+      price: payload.price,
+      imageUrl: payload.imageUrl,
+      imagePlan: payload.imagePlan,
+      hasBalcony: payload.hasBalcony,
+      isFurnished: payload.isFurnished,
+      isPublished: payload.isPublished,
     })
 
     await property.save()
-    await property.load('residence')
+
+    await property.load((loader) => {
+      loader.load('residence')
+      loader.load('residenceFloor')
+      loader.load('project')
+    })
 
     return response.ok(property)
   }
+
 
   /**
    * DELETE /api/properties/:id

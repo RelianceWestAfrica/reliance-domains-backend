@@ -7,6 +7,8 @@ export const createPropertyValidator = vine.compile(
     type: vine.enum(['APARTMENT', 'VILLA', 'SHOP', 'OFFICE', 'OTHER'] as const),
 
     residenceId: vine.number().positive(),
+    projectId: vine.number().positive(),
+    residenceFloorId: vine.number().positive(),
 
     status: vine.enum(
       ['AVAILABLE', 'UNDER_DISCUSSION', 'RESERVED', 'SOLD'] as const
@@ -18,6 +20,7 @@ export const createPropertyValidator = vine.compile(
     price: vine.number().min(0),            // prix ≥ 0
 
     imageUrl: vine.string().url().optional(),
+    imagePlan: vine.string().url().optional(),
 
     hasBalcony: vine.boolean().optional(),
     isFurnished: vine.boolean().optional(),
@@ -33,6 +36,8 @@ export const updatePropertyValidator = vine.compile(
     type: vine.enum(['APARTMENT', 'VILLA', 'SHOP', 'OFFICE', 'OTHER'] as const).optional(),
 
     residenceId: vine.number().positive().optional(),
+    projectId: vine.number().positive(),
+    residenceFloorId: vine.number().positive(),
 
     status: vine
       .enum(['AVAILABLE', 'UNDER_DISCUSSION', 'RESERVED', 'SOLD'] as const)
@@ -44,6 +49,7 @@ export const updatePropertyValidator = vine.compile(
     price: vine.number().min(0).optional(),
 
     imageUrl: vine.string().url().optional(),
+    imagePlan: vine.string().url().optional(),
 
     hasBalcony: vine.boolean().optional(),
     isFurnished: vine.boolean().optional(),
