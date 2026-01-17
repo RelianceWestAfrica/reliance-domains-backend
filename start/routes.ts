@@ -50,6 +50,7 @@ router
  * Prefix : /api/access-code
  */
 router.post('/api/access-code/login', [AccessCodeController, 'login'])
+router.get('/api/access-code/list', [AccessCodeController, 'accessList'])
 
 /***
  GESTION DE PAYS

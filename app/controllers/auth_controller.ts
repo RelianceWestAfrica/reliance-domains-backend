@@ -27,7 +27,6 @@ export default class AuthController {
       lastName: payload.lastName?.trim() || null,
       role: payload.role ?? 'COMMERCIAL',
       isActive: true,
-      accessCode: payload.accessCode ?? null,
     })
 
     // Génération du token API

@@ -28,4 +28,13 @@ export default class AccessCodeController {
       status: true,
     }
   }
+
+  /**
+   * GET /api/auth/user/list
+   */
+  async accessList({ }: HttpContext) {
+    const access = AccessCode.query().orderBy('id', 'asc')
+
+    return access
+  }
 }

@@ -35,10 +35,6 @@ class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare isActive: boolean
 
-  // pour l’écran "code d’accès"
-  @column()
-  declare accessCode: string | null
-
   @column.dateTime()
   declare lastLoginAt: DateTime | null
 

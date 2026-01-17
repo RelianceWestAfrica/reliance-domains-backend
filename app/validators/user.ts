@@ -8,7 +8,7 @@ export const registerValidator = vine.compile(
     firstName: vine.string().optional(),
     lastName: vine.string().optional(),
     role: vine.enum(['COMMERCIAL', 'ADMIN', 'SUPERADMIN'] as const).optional(),
-    accessCode: vine.string().optional(), // ex : code d’accès lié à l’utilisateur
+    // accessCode: vine.string().optional(), // ex : code d’accès lié à l’utilisateur
   })
 )
 
