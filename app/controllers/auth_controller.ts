@@ -74,7 +74,7 @@ export default class AuthController {
 
     // Mise à jour de la dernière connexion
     user.lastLoginAt = DateTime.now()
-    await user.save()
+    await user.save() 
 
     // Création du token
     const token = await User.accessTokens.create(user, ['*'], {
