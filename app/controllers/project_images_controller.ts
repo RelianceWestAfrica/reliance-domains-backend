@@ -56,10 +56,9 @@ export default class ProjectImagesController {
   async index({ params }: HttpContext) {
     const project = await Project.query()
       .where('id', params.id)
-      .preload('images', (q) => q.orderBy('position', 'asc'))
       .firstOrFail()
 
-    return project.images
+    return project
   }
 
   /**
