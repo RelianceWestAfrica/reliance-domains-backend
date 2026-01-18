@@ -5,16 +5,29 @@ import {
   createProjectValidator,
   updateProjectValidator,
 } from '#validators/project'
+import User from '#models/user'
 
 export default class ProjectsController {
   /**
    * GET /api/projects
    * Filtres possibles : ?q=texte&status=PUBLISHED&countryId=1
    */
-  async index({ request }: HttpContext) {
+  async index({ request, auth }: HttpContext) {
+    const user = auth.user as User
     const { q, status, countryId } = request.qs()
 
     const query = Project.query().preload('country').orderBy('created_at', 'desc')
+
+    if (user.role !== 'SUPERADMIN') {
+      await user.load('allowedProjects')
+      const allowedProjectIds = user.allowedProjects.map((p: any) => p.id)
+
+      if (allowedProjectIds.length === 0) {
+        return []
+      }
+
+      query.whereIn('id', allowedProjectIds)
+    }
 
     if (q) {
       query.whereILike('name', `%${q}%`)
@@ -60,20 +73,38 @@ export default class ProjectsController {
   /**
    * GET /api/projects/:id
    */
-  async show({ params }: HttpContext) {
-    const project = await Project.query()
+  async show({ params, auth }: HttpContext) {
+    const user = auth.user as User
+    const query = Project.query()
       .where('id', params.id)
       .preload('country')
-      .firstOrFail()
 
+    if (user.role !== 'SUPERADMIN') {
+      await user.load('allowedProjects')
+      const allowedProjectIds = user.allowedProjects.map((p: any) => p.id)
+      query.whereIn('id', allowedProjectIds)
+    }
+
+    const project = await query.firstOrFail()
     return project
   }
 
   /**
    * PUT /api/projects/:id
    */
-  async update({ params, request }: HttpContext) {
+  async update({ params, request, auth }: HttpContext) {
+    const user = auth.user as User
     const project = await Project.findOrFail(params.id)
+
+    if (user.role !== 'SUPERADMIN') {
+      await user.load('allowedProjects')
+      const allowedProjectIds = user.allowedProjects.map((p) => p.id)
+
+      if (!allowedProjectIds.includes(project.id)) {
+        throw new Error('Vous n\'avez pas accès à ce projet')
+      }
+    }
+
     const payload = await request.validateUsing(updateProjectValidator)
 
     project.merge({
@@ -99,8 +130,19 @@ export default class ProjectsController {
   /**
    * DELETE /api/projects/:id
    */
-  async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response, auth }: HttpContext) {
+    const user = auth.user as User
     const project = await Project.findOrFail(params.id)
+
+    if (user.role !== 'SUPERADMIN') {
+      await user.load('allowedProjects')
+      const allowedProjectIds = user.allowedProjects.map((p: any) => p.id)
+
+      if (!allowedProjectIds.includes(project.id)) {
+        throw new Error('Vous n\'avez pas accès à ce projet')
+      }
+    }
+
     await project.delete()
 
     return response.noContent()

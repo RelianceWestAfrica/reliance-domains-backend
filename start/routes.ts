@@ -13,6 +13,7 @@ import PropertiesController from "#controllers/properties_controller";
 import ClientsController from "#controllers/clients_controller";
 import DomainsController from "#controllers/domains_controller";
 import AcquisitionsController from "#controllers/acquisitions_controller";
+import PermissionsController from "#controllers/permissions_controller";
 
 /**
  * Petit endpoint de test
@@ -164,5 +165,13 @@ router.group(() => {
   // router.put('/:id', [DomainsController, 'update'])
   // router.delete('/:id', [DomainsController, 'destroy'])
 }).prefix('api/acquisition')
+
+router.group(() => {
+  router.get('/eligible-users', [PermissionsController, 'getEligibleUsers'])
+  router.get('/', [PermissionsController, 'index'])
+  router.get('/user/:userId', [PermissionsController, 'getUserPermissions'])
+  router.post('/assign', [PermissionsController, 'assignProjects'])
+  router.delete('/user/:userId/project/:projectId', [PermissionsController, 'removeProject'])
+}).prefix('api/permissions').use(middleware.auth())
 
 

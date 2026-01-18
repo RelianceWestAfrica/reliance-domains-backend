@@ -8,13 +8,15 @@ import {
 } from '#validators/property'
 import Project from "#models/project";
 import ResidenceFloor from "#models/residence_floor";
+import PermissionService from '#services/permission_service'
 
 export default class PropertiesController {
   /**
    * GET /api/properties
    * Filtres : ?q=&type=&status=&residenceId=&minPrice=&maxPrice=&minSurface=&maxSurface=
    */
-  async index({ request }: HttpContext) {
+  async index({ request, auth }: HttpContext) {
+    const user = auth.user!
     const {
       q,
       type,
@@ -29,6 +31,8 @@ export default class PropertiesController {
     const query = Property.query()
       .preload('residence')
       .orderBy('created_at', 'desc')
+
+    await PermissionService.filterByProjectAccess(user, query)
 
     if (q) {
       query.whereILike('title', `%${q}%`)
@@ -68,8 +72,14 @@ export default class PropertiesController {
    * POST /api/properties
    * Création d'une propriété
    */
-  async store({ request, response }: HttpContext) {
+  async store({ request, response, auth }: HttpContext) {
+    const user = auth.user!
     const payload = await request.validateUsing(createPropertyValidator)
+
+    const canAccess = await PermissionService.canAccessProject(user, payload.projectId)
+    if (!canAccess) {
+      return response.forbidden({ message: 'Vous n\'avez pas accès à ce projet' })
+    }
 
     // FK obligatoires
     await Project.findOrFail(payload.projectId)
@@ -113,21 +123,36 @@ export default class PropertiesController {
   /**
    * GET /api/properties/:id
    */
-  async show({ params }: HttpContext) {
-    return await Property.query()
+  async show({ params, auth, response }: HttpContext) {
+    const user = auth.user!
+    const property = await Property.query()
       .where('id', params.id)
       .preload('residence')
       .preload('residenceFloor')
       .preload('project')
       .firstOrFail()
+
+    const canAccess = await PermissionService.canAccessProject(user, property.projectId)
+    if (!canAccess) {
+      return response.forbidden({ message: 'Vous n\'avez pas accès à cette propriété' })
+    }
+
+    return property
   }
 
 
   /**
    * PUT /api/properties/:id
    */
-  async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response, auth }: HttpContext) {
+    const user = auth.user!
     const property = await Property.findOrFail(params.id)
+
+    const canAccess = await PermissionService.canAccessProject(user, property.projectId)
+    if (!canAccess) {
+      return response.forbidden({ message: 'Vous n\'avez pas accès à cette propriété' })
+    }
+
     const payload = await request.validateUsing(updatePropertyValidator)
 
     if (payload.projectId) {
@@ -175,8 +200,15 @@ export default class PropertiesController {
   /**
    * DELETE /api/properties/:id
    */
-  async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response, auth }: HttpContext) {
+    const user = auth.user!
     const property = await Property.findOrFail(params.id)
+
+    const canAccess = await PermissionService.canAccessProject(user, property.projectId)
+    if (!canAccess) {
+      return response.forbidden({ message: 'Vous n\'avez pas accès à cette propriété' })
+    }
+
     await property.delete()
 
     return response.noContent()

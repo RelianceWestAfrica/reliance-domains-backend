@@ -5,18 +5,42 @@ import {
   createResidenceValidator,
   updateResidenceValidator,
 } from '#validators/residence'
+import Domain from '#models/domain'
+import PermissionService from '#services/permission_service'
+import User from '#models/user'
 
 export default class ResidencesController {
   /**
    * GET /api/residences
    * Filtres : ?q=texte&hId=1&type=IMMEUBLE&status=PUBLISHED
    */
-  async index({ request }: HttpContext) {
+  async index({ request, auth }: HttpContext) {
+    const user = auth.user as User
     const { q, domainId, type, status } = request.qs()
 
     const query = Residence.query()
       .preload('domain')
       .orderBy('created_at', 'desc')
+
+    if (user.role !== 'SUPERADMIN') {
+      const allowedProjectIds = await PermissionService.getAllowedProjectIds(user)
+
+      if (allowedProjectIds.length === 0) {
+        return []
+      }
+
+      const allowedDomains = await Domain.query()
+        .whereIn('project_id', allowedProjectIds)
+        .select('id')
+
+      const allowedDomainIds = allowedDomains.map(d => d.id)
+
+      if (allowedDomainIds.length === 0) {
+        return []
+      }
+
+      query.whereIn('domain_id', allowedDomainIds)
+    }
 
     if (q) {
       query.whereILike('title', `%${q}%`)
@@ -41,8 +65,16 @@ export default class ResidencesController {
   /**
    * POST /api/residences
    */
-  async store({ request, response }: HttpContext) {
+  async store({ request, response, auth }: HttpContext) {
+    const user = auth.user as User
     const payload = await request.validateUsing(createResidenceValidator)
+
+    const domain = await Domain.findOrFail(payload.domainId)
+    const canAccess = await PermissionService.canAccessProject(user, domain.projectId)
+
+    if (!canAccess) {
+      return response.forbidden({ message: 'Vous n\'avez pas accès à ce domaine' })
+    }
 
     const residence = await Residence.create({
       title: payload.title,
@@ -63,11 +95,19 @@ export default class ResidencesController {
   /**
    * GET /api/residences/:id
    */
-  async show({ params }: HttpContext) {
+  async show({ params, auth }: HttpContext) {
+    const user = auth.user as User
     const residence = await Residence.query()
       .where('id', params.id)
       .preload('domain')
       .firstOrFail()
+
+    const domain = await Domain.findOrFail(residence.domainId)
+    const canAccess = await PermissionService.canAccessProject(user, domain.projectId)
+
+    if (!canAccess) {
+      throw new Error('Vous n\'avez pas accès à cette résidence')
+    }
 
     return residence
   }
@@ -75,8 +115,17 @@ export default class ResidencesController {
   /**
    * PUT /api/residences/:id
    */
-  async update({ params, request }: HttpContext) {
+  async update({ params, request, auth }: HttpContext) {
+    const user = auth.user as User
     const residence = await Residence.findOrFail(params.id)
+
+    const domain = await Domain.findOrFail(residence.domainId)
+    const canAccess = await PermissionService.canAccessProject(user, domain.projectId)
+
+    if (!canAccess) {
+      throw new Error('Vous n\'avez pas accès à cette résidence')
+    }
+
     const payload = await request.validateUsing(updateResidenceValidator)
 
     residence.merge({
@@ -99,8 +148,17 @@ export default class ResidencesController {
   /**
    * DELETE /api/residences/:id
    */
-  async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response, auth }: HttpContext) {
+    const user = auth.user as User
     const residence = await Residence.findOrFail(params.id)
+
+    const domain = await Domain.findOrFail(residence.domainId)
+    const canAccess = await PermissionService.canAccessProject(user, domain.projectId)
+
+    if (!canAccess) {
+      return response.forbidden({ message: 'Vous n\'avez pas accès à cette résidence' })
+    }
+
     await residence.delete()
 
     return response.noContent()

@@ -1,17 +1,12 @@
-// app/controllers/auth_controller.ts
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { DateTime } from 'luxon'
 import { loginValidator, registerValidator } from '#validators/user'
 
 export default class AuthController {
-  /**
-   * POST /api/auth/register
-   */
   async register({ request, response }: HttpContext) {
     const payload = await request.validateUsing(registerValidator)
 
-    // Vérifier si l'email existe déjà
     const existingUser = await User.query().where('email', payload.email).first()
     if (existingUser) {
       return response.conflict({
@@ -19,7 +14,6 @@ export default class AuthController {
       })
     }
 
-    // Création de l'utilisateur
     const user = await User.create({
       email: payload.email.toLowerCase().trim(),
       password: payload.password,
@@ -29,9 +23,8 @@ export default class AuthController {
       isActive: true,
     })
 
-    // Génération du token API
     const token = await User.accessTokens.create(user, ['*'], {
-      expiresIn: '30 days', // Optionnel : durée personnalisée
+      expiresIn: '30 days',
     })
 
     return response.created({
@@ -44,39 +37,24 @@ export default class AuthController {
       },
       token: {
         type: 'bearer' as const,
-        value: token.value!.release(), // Libère le token pour l'envoi
+        value: token.value!.release(),
         expiresAt: token.expiresAt?.toISOString(),
       },
     })
   }
 
-  /**
-   * POST /api/auth/login
-   */
   async login({ request, response }: HttpContext) {
-    const { email } = await request.validateUsing(loginValidator)
+    const payload = await request.validateUsing(loginValidator)
 
-    // @ts-ignore
-    const user: User = await User.query().where('email', email).first()
+    const user = await User.verifyCredentials(payload.email, payload.password)
 
-    let pass = await User.hashPassword(user);
-    console.log(user)
-    console.log(pass)
-
-    if (pass !== user.password) {
-      return response.unauthorized({message: 'Mot de passe incorrect'})
-    }
-
-    // Vérifications post-auth
     if (!user.isActive) {
       return response.forbidden({ message: 'Votre compte est désactivé.' })
     }
 
-    // Mise à jour de la dernière connexion
     user.lastLoginAt = DateTime.now()
     await user.save()
 
-    // Création du token
     const token = await User.accessTokens.create(user, ['*'], {
       expiresIn: '30 days',
     })
@@ -97,13 +75,10 @@ export default class AuthController {
     })
   }
 
-  /**
-   * GET /api/auth/me
-   */
   async me({ auth, response }: HttpContext) {
-    await auth.authenticate() // Charge l'utilisateur via le guard API
+    await auth.authenticate()
 
-    const user = auth.user!
+    const user = auth.user as User
 
     return response.ok({
       id: user.id,
@@ -116,30 +91,14 @@ export default class AuthController {
     })
   }
 
-  /**
-   * GET /api/auth/user/list
-   */
   async usersList({ }: HttpContext) {
-    const users = User.query().orderBy('id', 'asc')
+    const users = await User.query().orderBy('id', 'asc')
 
     return users
   }
 
-  /**
-   * POST /api/auth/logout
-   */
   async logout({ auth, response }: HttpContext) {
-    const user = auth.user!
-
-    // Récupère le token courant
-    const tokenId = auth.authenticationAttempt?.token?.identifier
-
-    if (!tokenId) {
-      return response.badRequest({ message: 'Aucun token actif trouvé.' })
-    }
-
-    // Suppression du token spécifique (meilleure pratique)
-    await User.accessTokens.delete(user, tokenId)
+    await auth.use('api').invalidateToken()
 
     return response.ok({
       message: 'Déconnexion réussie.',
