@@ -5,11 +5,6 @@ import {
   createResidenceValidator,
   updateResidenceValidator,
 } from '#validators/residence'
-<<<<<<< Updated upstream
-=======
-import Domain from '#models/domain'
-import User from '#models/user'
->>>>>>> Stashed changes
 
 export default class ResidencesController {
   /**

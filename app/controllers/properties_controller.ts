@@ -8,7 +8,6 @@ import {
 } from '#validators/property'
 import Project from "#models/project";
 import ResidenceFloor from "#models/residence_floor";
-import PermissionService from '#services/permission_service'
 
 export default class PropertiesController {
   /**
