@@ -53,7 +53,7 @@ export default class AuthController {
     }
 
     user.lastLoginAt = DateTime.now()
-    await user.save()
+    await user.save() 
 
     const token = await User.accessTokens.create(user, ['*'], {
       expiresIn: '30 days',
