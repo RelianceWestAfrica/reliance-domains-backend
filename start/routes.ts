@@ -27,24 +27,23 @@ router.get('/api/health', () => {
  * AUTH CLASSIQUE (email + mot de passe)
  * Prefix : /api/auth
  */
+// POST /api/auth/login
+router.post('/api/auth/login', [AuthController, 'login'])
+
 router
   .group(() => {
     // POST /api/auth/register
     router.post('register', [AuthController, 'register'])
 
-    // POST /api/auth/login
-    router.post('login', [AuthController, 'login'])
-
     // GET /api/auth/me (token obligatoire)
-    router.get('me', [AuthController, 'me']).use(middleware.auth())
+    router.get('me', [AuthController, 'me'])
 
-
-    router.get('user/list', [AuthController, 'usersList']).use(middleware.auth())
+    router.get('user/list', [AuthController, 'usersList'])
 
     // POST /api/auth/logout (token obligatoire)
-    router.post('logout', [AuthController, 'logout']).use(middleware.auth())
+    router.post('logout', [AuthController, 'logout'])
   })
-  .prefix('/api/auth')
+  .prefix('/api/auth').use(middleware.auth())
 
 /**
  * LOGIN PAR CODE D’ACCÈS
@@ -173,5 +172,8 @@ router.group(() => {
   router.post('/assign', [PermissionsController, 'assignProjects'])
   router.delete('/user/:userId/project/:projectId', [PermissionsController, 'removeProject'])
 }).prefix('api/permissions').use(middleware.auth())
+
+
+
 
 

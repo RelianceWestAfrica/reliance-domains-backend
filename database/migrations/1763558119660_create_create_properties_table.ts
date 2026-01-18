@@ -15,15 +15,7 @@ export default class extends BaseSchema {
       table
         .enu('type', ['STUDIO', 'APARTMENT', 'VILLA', 'SHOP', 'OFFICE', 'OTHER'])
         .notNullable()
-        .defaultTo('APARTMENT') // pour "appartement", "villa", "magasin" etc.
-
-      table
-        .integer('project_id')
-        .unsigned()
-        .notNullable()
-        .references('id')
-        .inTable('projects')
-        .onDelete('CASCADE')
+        .defaultTo('APARTMENT') // pour "appartement", "villa", "magasin"
 
       table
         .integer('residence_id')

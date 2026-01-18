@@ -9,7 +9,7 @@ export default class CountriesController {
    * Liste de tous les pays
    */
   async index({}: HttpContext) {
-    const countries = await Country.query().orderBy('name', 'asc')
+    const [countries] = await Promise.all([Country.query().orderBy('name', 'asc')])
     return countries
   }
 

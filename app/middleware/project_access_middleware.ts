@@ -6,11 +6,11 @@ export default class ProjectAccessMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
     const user = ctx.auth.user as User | undefined
 
-    if (!user) {
-      return ctx.response.unauthorized({ message: 'Utilisateur non authentifié' })
-    }
+    // if (!user) {
+    //   return ctx.response.unauthorized({ message: 'Utilisateur non authentifié' })
+    // }
 
-    if (user.role === 'SUPERADMIN') {
+    if (user!.role === 'SUPERADMIN') {
       return next()
     }
 
@@ -23,8 +23,8 @@ export default class ProjectAccessMiddleware {
       return next()
     }
 
-    await user.load('allowedProjects')
-    const allowedProjectIds = user.allowedProjects.map((p: any) => p.id)
+    await user!.load('allowedProjects')
+    const allowedProjectIds = user!.allowedProjects.map((p: any) => p.id)
 
     if (!allowedProjectIds.includes(Number(projectId))) {
       return ctx.response.forbidden({
