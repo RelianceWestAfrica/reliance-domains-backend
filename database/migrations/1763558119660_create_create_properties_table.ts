@@ -10,15 +10,25 @@ export default class extends BaseSchema {
 
       table.string('title').notNullable() // Ex: Appartement 3P - A101
 
+      table.integer('floor_id').unsigned().notNullable().references('id').inTable('residence_floors').onDelete('CASCADE')
+
       table
-        .enu('type', ['APARTMENT', 'VILLA', 'SHOP', 'OFFICE', 'OTHER'])
+        .enu('type', ['STUDIO', 'APARTMENT', 'VILLA', 'SHOP', 'OFFICE', 'OTHER'])
         .notNullable()
         .defaultTo('APARTMENT') // pour "appartement", "villa", "magasin" etc.
 
       table
-        .integer('residence_id')
+        .integer('project_id')
         .unsigned()
         .notNullable()
+        .references('id')
+        .inTable('projects')
+        .onDelete('CASCADE')
+
+      table
+        .integer('residence_id')
+        .unsigned()
+        .nullable()
         .references('id')
         .inTable('residences')
         .onDelete('CASCADE')
@@ -29,7 +39,7 @@ export default class extends BaseSchema {
         .defaultTo('AVAILABLE')
 
       table.integer('rooms_count').notNullable().defaultTo(1)    // Nombre de pièces
-      table.integer('kitchens_count').notNullable().defaultTo(1) // Nombre de cuisines
+      table.integer('kitchens_count').notNullable().defaultTo(0) // Nombre de cuisines
 
       table.decimal('surface', 10, 2).notNullable().defaultTo(0) // m²
       table.decimal('price', 15, 2).notNullable().defaultTo(0)   // FCFA
