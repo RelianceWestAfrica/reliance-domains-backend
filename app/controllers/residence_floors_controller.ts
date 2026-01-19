@@ -87,6 +87,20 @@ export default class ResidenceFloorsController {
     return floor
   }
 
+  public async showByIdResidence({ params }: HttpContext) {
+
+    const floors = await ResidenceFloor
+      .query()
+      .where('residence_id', params.id)
+      // .preload('residence')
+
+    console.log(floors)
+
+    return floors
+  }
+
+
+
   /**
    * PUT /api/floors/:id
    */

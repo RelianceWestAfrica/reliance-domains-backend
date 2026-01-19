@@ -29,7 +29,7 @@ export default class UpdatePropertiesAddProjectAndFloor extends BaseSchema {
       /**
        * 3. Ajout image_plan
        */
-      // table.string('image_plan').nullable()
+      table.string('image_plan').nullable()
 
       /**
        * 4. Ajout project_id (FK NOT NULL)

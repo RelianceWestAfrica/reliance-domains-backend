@@ -120,6 +120,7 @@ router
     router.get('/', [ResidenceFloorsController, 'index'])      // liste + filtres
     router.post('/', [ResidenceFloorsController, 'store'])     // créer un palier
     router.get('/:id', [ResidenceFloorsController, 'show'])    // détail
+    router.get('/:id/residence', [ResidenceFloorsController, 'showByIdResidence'])   // detail par res
     router.put('/:id', [ResidenceFloorsController, 'update'])  // modifier
     router.delete('/:id', [ResidenceFloorsController, 'destroy']) // supprimer
   })
