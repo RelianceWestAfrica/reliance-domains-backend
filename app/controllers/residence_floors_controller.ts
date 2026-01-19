@@ -92,7 +92,7 @@ export default class ResidenceFloorsController {
     const floors = await ResidenceFloor
       .query()
       .where('residence_id', params.id)
-      // .preload('residence')
+      .preload('residence')
 
     console.log(floors)
 
