@@ -50,10 +50,10 @@ export default class AuthController {
 
     if (!user.isActive) {
       return response.forbidden({ message: 'Votre compte est désactivé.' })
-    }
+    } 
 
     user.lastLoginAt = DateTime.now()
-    await user.save() 
+    await user.save()
 
     const token = await User.accessTokens.create(user, ['*'], {
       expiresIn: '30 days',
