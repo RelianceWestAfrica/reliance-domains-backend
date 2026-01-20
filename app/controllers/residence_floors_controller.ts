@@ -6,6 +6,7 @@ import {
   createResidenceFloorValidator,
   updateResidenceFloorValidator,
 } from '#validators/residence_floor'
+import Property from "#models/property";
 
 export default class ResidenceFloorsController {
   /**
@@ -88,18 +89,27 @@ export default class ResidenceFloorsController {
   }
 
   public async showByIdResidence({ params }: HttpContext) {
-
     const floors = await ResidenceFloor
       .query()
       .where('residence_id', params.id)
+      .orderBy('id', 'asc')
       .preload('residence')
 
-    console.log(floors)
 
-    return floors
+    const properties = await Property
+      .all()
+
+    const result = floors.map((floor) => {
+      return {
+        ...floor.serialize(),
+        properties: properties.filter(
+          (property) => property.residenceFloorId == floor.id
+        ),
+      }
+    })
+
+    return result
   }
-
-
 
   /**
    * PUT /api/floors/:id
