@@ -23,8 +23,8 @@ export default class extends BaseSchema {
 
       table.date('date_acquisition').notNullable()
 
-      table.timestamp('created_at').nullable()
-      table.timestamp('updated_at').nullable()
+      table.timestamp('created_at', { useTz: true }).defaultTo(this.now())
+      table.timestamp('updated_at', { useTz: true }).defaultTo(this.now())
     })
   }
 
