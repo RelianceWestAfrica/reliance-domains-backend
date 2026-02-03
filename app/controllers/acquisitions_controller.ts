@@ -2,6 +2,8 @@
 
 
 import Acquisition from "#models/acquisition";
+import Property from "#models/property";
+import { updatePropertyValidator } from '#validators/property'
 import type {HttpContext} from "@adonisjs/core/http";
 
 export default class AcquisitionsController {
@@ -63,6 +65,15 @@ export default class AcquisitionsController {
       dateAcquisition: data.date,
       contract: data.contract
     })
+
+    const property = await Property.findOrFail(data.property_id)
+    // const payload = await request.validateUsing(updatePropertyValidator)
+
+    property.merge({
+      status: data.status,
+    })
+
+    await property.save()
 
     await acquisition.load('client')
     await acquisition.load('property')
