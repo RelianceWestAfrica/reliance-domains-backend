@@ -28,8 +28,10 @@ jobs:
             set -e
 
             ls
-          
-            cd $VPS_PATH
+
+            cd reliance-domains-backend/
+
+            ls
 
             echo "Pulling latest code..."
             git pull
