@@ -30,7 +30,7 @@ jobs:
             cd $VPS_PATH
 
             echo "Pulling latest code..."
-            git pull origin main
+            git pull
 
             echo "Stopping old containers..."
             docker compose down || true
