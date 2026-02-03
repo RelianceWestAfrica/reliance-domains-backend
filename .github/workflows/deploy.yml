@@ -29,6 +29,10 @@ jobs:
 
             cd $VPS_PATH
 
+            ls
+
+            echo ls
+          
             echo "Pulling latest code..."
             git pull
 
