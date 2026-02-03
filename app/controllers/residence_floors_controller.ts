@@ -6,6 +6,8 @@ import {
   createResidenceFloorValidator,
   updateResidenceFloorValidator,
 } from '#validators/residence_floor'
+import Property from "#models/property";
+import Acquisition from "#models/acquisition";
 
 export default class ResidenceFloorsController {
   /**
@@ -85,6 +87,50 @@ export default class ResidenceFloorsController {
       .firstOrFail()
 
     return floor
+  }
+
+  public async showByIdResidence({ params }: HttpContext) {
+    const floors = await ResidenceFloor
+      .query()
+      .where('residence_id', params.id)
+      .orderBy('id', 'asc')
+      .preload('residence')
+
+    const properties = await Property
+      .all()
+
+    const acquisitions = (await Acquisition
+        .query()
+        .orderBy('created_at', 'desc')
+        .preload('client')
+    ).map(a => a.serialize())
+
+    console.log(acquisitions)
+
+    const result = floors.map((floor) => {
+      return {
+        ...floor.serialize(),
+        properties: properties
+          .filter(property => property.residenceFloorId === floor.id)
+          .map(property => {
+            // filtrer les acquisitions liées à ce property
+            const propertyAcquisitions = acquisitions
+              .filter(acq => acq.propertyId === property.$original.id)
+              .sort(
+                (a, b) =>
+                  new Date(b.created_at).getTime() -
+                  new Date(a.created_at).getTime()
+              )
+
+            return {
+              ...property.$original,
+              lastAcquisition: propertyAcquisitions[0] || null,
+            }
+          }),
+      }
+    })
+
+    return result
   }
 
   /**

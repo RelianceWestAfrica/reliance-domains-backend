@@ -1,19 +1,18 @@
-// app/models/user.ts
 import { DateTime } from 'luxon'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
 import hash from '@adonisjs/core/services/hash'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
-import { beforeSave } from '@adonisjs/lucid/orm'
+import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import Project from '#models/project'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
   passwordColumnName: 'password',
 })
 
-export default // @ts-ignore
-class User extends compose(BaseModel, AuthFinder) {
+export default class User extends compose(BaseModel, AuthFinder) {
   @column({ isPrimary: true })
   declare id: number
 
@@ -44,15 +43,14 @@ class User extends compose(BaseModel, AuthFinder) {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 
-  // Provider de tokens API (table auth_access_tokens)
+  @manyToMany(() => Project, {
+    pivotTable: 'user_project_permissions',
+    localKey: 'id',
+    pivotForeignKey: 'user_id',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'project_id',
+  })
+  declare allowedProjects: ManyToMany<typeof Project>
+
   static accessTokens = DbAccessTokensProvider.forModel(User)
-
-  @beforeSave()
-  static async hashPassword(user: User) {
-    if (user.$dirty.password) {
-      user.password = await hash.use('scrypt').make(user.password)
-    }
-
-    return user.password
-  }
 }

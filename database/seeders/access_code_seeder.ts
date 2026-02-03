@@ -23,8 +23,8 @@ export default class AccessCodeSeeder extends BaseSeeder {
         expires_at: null,
       },
       {
-        code: 'NG_RWAI3',
-        label: 'RWA Nigeria',
+        code: 'BF_RWAI3',
+        label: 'RWA Burkina Faso',
         role: 'ADMIN' as const,
         is_active: true,
         max_uses: null,

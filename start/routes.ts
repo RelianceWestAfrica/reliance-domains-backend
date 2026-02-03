@@ -13,6 +13,7 @@ import PropertiesController from "#controllers/properties_controller";
 import ClientsController from "#controllers/clients_controller";
 import DomainsController from "#controllers/domains_controller";
 import AcquisitionsController from "#controllers/acquisitions_controller";
+import PermissionsController from "#controllers/permissions_controller";
 
 /**
  * Petit endpoint de test
@@ -26,24 +27,23 @@ router.get('/api/health', () => {
  * AUTH CLASSIQUE (email + mot de passe)
  * Prefix : /api/auth
  */
+// POST /api/auth/login
+router.post('/api/auth/login', [AuthController, 'login'])
+
 router
   .group(() => {
     // POST /api/auth/register
     router.post('register', [AuthController, 'register'])
 
-    // POST /api/auth/login
-    router.post('login', [AuthController, 'login'])
-
     // GET /api/auth/me (token obligatoire)
-    router.get('me', [AuthController, 'me']).use(middleware.auth())
+    router.get('me', [AuthController, 'me'])
 
-
-    router.get('user/list', [AuthController, 'usersList']).use(middleware.auth())
+    router.get('user/list', [AuthController, 'usersList'])
 
     // POST /api/auth/logout (token obligatoire)
-    router.post('logout', [AuthController, 'logout']).use(middleware.auth())
+    router.post('logout', [AuthController, 'logout'])
   })
-  .prefix('/api/auth')
+  .prefix('/api/auth').use(middleware.auth())
 
 /**
  * LOGIN PAR CODE D’ACCÈS
@@ -120,6 +120,7 @@ router
     router.get('/', [ResidenceFloorsController, 'index'])      // liste + filtres
     router.post('/', [ResidenceFloorsController, 'store'])     // créer un palier
     router.get('/:id', [ResidenceFloorsController, 'show'])    // détail
+    router.get('/:id/residence', [ResidenceFloorsController, 'showByIdResidence'])   // detail par res
     router.put('/:id', [ResidenceFloorsController, 'update'])  // modifier
     router.delete('/:id', [ResidenceFloorsController, 'destroy']) // supprimer
   })
@@ -164,5 +165,16 @@ router.group(() => {
   // router.put('/:id', [DomainsController, 'update'])
   // router.delete('/:id', [DomainsController, 'destroy'])
 }).prefix('api/acquisition')
+
+router.group(() => {
+  router.get('/eligible-users', [PermissionsController, 'getEligibleUsers'])
+  router.get('/', [PermissionsController, 'index'])
+  router.get('/user/:userId', [PermissionsController, 'getUserPermissions'])
+  router.post('/assign', [PermissionsController, 'assignProjects'])
+  router.delete('/user/:userId/project/:projectId', [PermissionsController, 'removeProject'])
+}).prefix('api/permissions').use(middleware.auth())
+
+
+
 
 

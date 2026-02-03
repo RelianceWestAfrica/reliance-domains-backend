@@ -23,6 +23,7 @@ export default class DomainsController {
       'domain_type',
       'project_id',
       'description',
+      'residencesCount',
       'image_url',
       'published',
     ])
