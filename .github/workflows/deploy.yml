@@ -27,9 +27,9 @@ jobs:
           sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no -p $VPS_PORT $VPS_USER@$VPS_HOST << 'EOF'
             set -e
 
-            cd /reliance-domains-backend/
-
             ls
+          
+            cd $VPS_PATH
 
             echo "Pulling latest code..."
             git pull
