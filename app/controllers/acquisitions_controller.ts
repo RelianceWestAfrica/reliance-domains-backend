@@ -38,7 +38,7 @@ export default class AcquisitionsController {
 
       dateAcquisition: a.dateAcquisition,
 
-      contract: a.contract || null  // tu peux renvoyer l'objet contract complet
+      // contract: a.contract || null  // tu peux renvoyer l'objet contract complet
     }))
   }
 
@@ -52,7 +52,7 @@ export default class AcquisitionsController {
       'payment_type',
       'status',
       'date',
-      'contract'
+      // 'contract'
     ])
 
     const acquisition = await Acquisition.create({
@@ -63,7 +63,7 @@ export default class AcquisitionsController {
       paymentType: data.payment_type,
       status: data.status,
       dateAcquisition: data.date,
-      contract: data.contract
+      // contract: data.contract
     })
 
     const property = await Property.findOrFail(data.property_id)
@@ -80,4 +80,19 @@ export default class AcquisitionsController {
 
     return response.created(acquisition)
   }
+
+  public async destroy({ params, response }: HttpContext) {
+    const acquisition = await Acquisition.findOrFail(params.id)
+    await acquisition.delete()
+    const property = await Property.findOrFail(acquisition.propertyId)
+    // const payload = await request.validateUsing(updatePropertyValidator)
+
+    property.merge({
+      status: 'AVAILABLE',
+    })
+
+    await property.save()
+    return response.noContent()
+  }
+
 }

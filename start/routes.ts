@@ -14,6 +14,7 @@ import ClientsController from "#controllers/clients_controller";
 import DomainsController from "#controllers/domains_controller";
 import AcquisitionsController from "#controllers/acquisitions_controller";
 import PermissionsController from "#controllers/permissions_controller";
+import ContractsController from '#controllers/contracts_controller';
 
 /**
  * Petit endpoint de test
@@ -165,6 +166,13 @@ router.group(() => {
   // router.put('/:id', [DomainsController, 'update'])
   // router.delete('/:id', [DomainsController, 'destroy'])
 }).prefix('api/acquisition')
+
+router.group(() => {
+  router.get('/', [ContractsController, 'index'])
+  router.post('/', [ContractsController, 'store'])
+  router.delete('/:id', [ContractsController, 'destroy'])
+  router.get('/:id/download', [ContractsController, 'download'])
+}).prefix('api/contract')
 
 router.group(() => {
   router.get('/eligible-users', [PermissionsController, 'getEligibleUsers'])

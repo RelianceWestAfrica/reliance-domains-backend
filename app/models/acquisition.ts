@@ -28,8 +28,8 @@ export default class Acquisition extends BaseModel {
   @column()
   public agent: string
 
-  @column()
-  public contract: string
+  // @column()
+  // public contract: string
 
   @column()
   public paymentType: PaymentType
