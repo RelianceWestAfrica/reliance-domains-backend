@@ -170,6 +170,7 @@ router.group(() => {
 router.group(() => {
   router.get('/', [ContractsController, 'index'])
   router.post('/', [ContractsController, 'store'])
+  router.put('/:id', [ContractsController, 'update'])
   router.delete('/:id', [ContractsController, 'destroy'])
   router.get('/:id/download', [ContractsController, 'download'])
 }).prefix('api/contract')
