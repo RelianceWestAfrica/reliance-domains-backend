@@ -1,8 +1,9 @@
 // app/models/project.ts
-import {BaseModel, belongsTo, column} from '@adonisjs/lucid/orm'
+import {BaseModel, belongsTo, column, manyToMany} from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import Country from '#models/country'
-import type {BelongsTo} from '@adonisjs/lucid/types/relations'
+import type {BelongsTo, ManyToMany} from '@adonisjs/lucid/types/relations'
+import User from "#models/user";
 
 export default class Project extends BaseModel {
   @column({ isPrimary: true })
@@ -44,9 +45,29 @@ export default class Project extends BaseModel {
   @column({ columnName: 'properties_count' })
   declare propertiesCount: number
 
+  @manyToMany(() => User, {
+    pivotTable: 'user_project_permissions',
+    localKey: 'id',
+    pivotForeignKey: 'project_id',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'user_id',
+  })
+  declare users: ManyToMany<typeof User>
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+
+  public static accessibleBy(user: User) {
+    if (user.role === 'SUPERADMIN') {
+      return this.query()
+    }
+
+    return this.query().whereHas('users', (query) => {
+      query.where('users.id', user.id)
+    })
+  }
 }

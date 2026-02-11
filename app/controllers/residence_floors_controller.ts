@@ -14,27 +14,40 @@ export default class ResidenceFloorsController {
    * GET /api/floors
    * Filtres : ?residenceId=1&q=Rez&level=0
    */
-  async index({ request }: HttpContext) {
-    const { residenceId, q, level } = request.qs()
+  async index({ request, auth }: HttpContext) {
+    const { q, residenceId, level } = request.qs()
+    const user = auth.user
 
+    if (!user) {
+      return { message: 'Utilisateur non authentifié' }
+    }
+
+    // Projets accessibles
+    let allowedProjectIds: any
+    if (user.role === 'SUPERADMIN') {
+      allowedProjectIds = null
+    } else {
+      const allowedProjects = await user.related('allowedProjects').query()
+      allowedProjectIds = allowedProjects.map((p: any) => p.id)
+    }
+    
     const query = ResidenceFloor.query()
-      .preload('residence')
+      .preload('residence', (rQuery) => rQuery.preload('domain'))
       .orderBy('level', 'asc')
 
-    if (residenceId) {
-      query.where('residence_id', Number(residenceId))
+    if (allowedProjectIds) {
+      query.whereHas('residence', (resQuery) => {
+        resQuery.whereHas('domain', (domainQuery) => {
+          domainQuery.whereIn('project_id', allowedProjectIds)
+        })
+      })
     }
 
-    if (q) {
-      query.whereILike('name', `%${q}%`)
-    }
+    if (residenceId) query.where('residence_id', Number(residenceId))
+    if (q) query.whereILike('name', `%${q}%`)
+    if (level !== undefined) query.where('level', Number(level))
 
-    if (level !== undefined) {
-      query.where('level', Number(level))
-    }
-
-    const floors = await query
-    return floors
+    return query
   }
 
   /**

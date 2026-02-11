@@ -11,11 +11,20 @@ export default class ProjectsController {
    * GET /api/projects
    * Filtres possibles : ?q=texte&status=PUBLISHED&countryId=1
    */
-  async index({ request }: HttpContext) {
-    const { q, status, countryId } = request.qs()
+  async index({ request, auth }: HttpContext) {
+    const {q, status, countryId} = request.qs()
+    const user = auth.user!
 
-    const query = Project.query().preload('country').orderBy('created_at', 'desc')
+    const query = Project.accessibleBy(user).preload('country').orderBy('created_at', 'desc')
 
+    // 🔐 Restriction d’accès
+    if (user.role !== 'SUPERADMIN') {
+      query.whereHas('users', (userQuery) => {
+        userQuery.where('users.id', user.id)
+      })
+    }
+
+    // 🔎 Filtres
     if (q) {
       query.whereILike('name', `%${q}%`)
     }
@@ -28,15 +37,16 @@ export default class ProjectsController {
       query.where('country_id', Number(countryId))
     }
 
-    const projects = await query
-    return projects
+    return query
   }
 
   /**
    * POST /api/projects
    */
-  async store({ request, response }: HttpContext) {
+  async store({ request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(createProjectValidator)
+
+    const user = auth.user!
 
     const project = await Project.create({
       name: payload.name,
@@ -51,6 +61,11 @@ export default class ProjectsController {
       residencesCount: payload.residencesCount ?? 0,
       propertiesCount: payload.propertiesCount ?? 0,
     })
+
+    // 🔐 Si ce n’est pas un superadmin, on lui attribue automatiquement
+    if (user.role !== 'SUPERADMIN') {
+      await user.related('allowedProjects').attach([project.id])
+    }
 
     await project.load('country')
 
