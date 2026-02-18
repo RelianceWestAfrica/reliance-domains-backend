@@ -9,8 +9,10 @@ export default class ContractsController {
   public async index() {
     const contracts = await Contract
       .query()
-      .preload('acquisition')
       .preload('user')
+      .preload('acquisition', (acquisitionQuery) => {
+        acquisitionQuery.preload('property').preload('client')
+      })
 
     return contracts.map(c => ({
       id: c.id,
