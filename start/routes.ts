@@ -168,12 +168,32 @@ router.group(() => {
 }).prefix('api/acquisition')
 
 router.group(() => {
-  router.get('/', [ContractsController, 'index'])
-  router.post('/', [ContractsController, 'store'])
-  router.put('/:id', [ContractsController, 'update'])
-  router.delete('/:id', [ContractsController, 'destroy'])
-  router.get('/:id/download', [ContractsController, 'download'])
-}).prefix('api/contract')
+  // Contrats
+  router.get('/contracts', '#controllers/contracts_controller.index')
+  router.get('/contracts/:id', '#controllers/contracts_controller.show')
+  router.post('/contracts/generate/:acquisitionId/:templateId', '#controllers/contracts_controller.generate')
+  router.post('/contracts/:id/upload-signed', '#controllers/contracts_controller.uploadSigned')
+  router.post('/contracts/:id/upload-identity', '#controllers/contracts_controller.uploadIdentity')
+  router.get('/contracts/:id/download', '#controllers/contracts_controller.download')
+  router.get('/contracts/:id/download-signed', '#controllers/contracts_controller.downloadSigned')
+  router.delete('/contracts/:id', '#controllers/contracts_controller.destroy')
+}).use(middleware.auth())
+
+router.group(() => {
+  router.get('/projects/:projectId/contract-templates', '#controllers/contract_templates_controller.index')
+  router.post('/projects/:projectId/contract-templates', '#controllers/contract_templates_controller.store')
+  router.patch('/contract-templates/:id/toggle', '#controllers/contract_templates_controller.toggle')
+  router.get('/contract-templates/variables', '#controllers/contract_templates_controller.variables')
+  router.delete('/contract-templates/:id', '#controllers/contract_templates_controller.destroy')
+}).use(middleware.auth())
+
+// router.group(() => {
+//   router.get('/', [ContractsController, 'index'])
+//   router.post('/', [ContractsController, 'store'])
+//   router.put('/:id', [ContractsController, 'update'])
+//   router.delete('/:id', [ContractsController, 'destroy'])
+//   router.get('/:id/download', [ContractsController, 'download'])
+// }).prefix('api/contract')
 
 router.group(() => {
   router.get('/eligible-users', [PermissionsController, 'getEligibleUsers'])
