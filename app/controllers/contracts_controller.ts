@@ -13,17 +13,26 @@ export default class ContractsController {
    * Liste des contrats d'une acquisition
    */
   async index({ request, response, auth }: HttpContext) {
-    const user = auth.user
-    if (!user) return response.unauthorized('Utilisateur non authentifié')
+    if (!auth.user) return response.unauthorized('Utilisateur non authentifié')
 
     const acquisitionId = request.input('acquisition_id')
+    const projectId = request.input('project_id')
 
-    const contracts = await Contract.query()
-      .where('acquisition_id', acquisitionId)
+    const query = Contract.query()
       .preload('template')
       .preload('client')
+      .preload('acquisition', q => q.preload('property'))
       .orderBy('created_at', 'desc')
 
+    if (acquisitionId) {
+      query.where('acquisition_id', acquisitionId)
+    }
+
+    if (projectId) {
+      query.where('project_id', projectId)
+    }
+
+    const contracts = await query
     return response.json(contracts)
   }
 
