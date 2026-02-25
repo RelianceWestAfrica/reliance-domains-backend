@@ -11,32 +11,40 @@ export default class ResidencesController {
    * GET /api/residences
    * Filtres : ?q=texte&hId=1&type=IMMEUBLE&status=PUBLISHED
    */
-  async index({ request }: HttpContext) {
+  async index({ request, auth }: HttpContext) {
     const { q, domainId, type, status } = request.qs()
+    const user = auth.user
+
+    if (!user) {
+      return { message: 'Utilisateur non authentifié' }
+    }
+
+    // Projets accessibles
+    let allowedProjectIds: any
+    if (user.role === 'SUPERADMIN') {
+      allowedProjectIds = null
+    } else {
+      const allowedProjects = await user.related('allowedProjects').query()
+      allowedProjectIds = allowedProjects.map((p: any) => p.id)
+    }
 
     const query = Residence.query()
       .preload('domain')
       .orderBy('created_at', 'desc')
 
-    if (q) {
-      query.whereILike('title', `%${q}%`)
+    if (allowedProjectIds) {
+      query.whereHas('domain', (domainQuery) => {
+        domainQuery.whereIn('project_id', allowedProjectIds)
+      })
     }
+    if (q) query.whereILike('title', `%${q}%`)
+    if (domainId) query.where('domain_id', Number(domainId))
+    if (type) query.where('type', type)
+    if (status) query.where('status', status)
 
-    if (domainId) {
-      query.where('domainId', Number(domainId))
-    }
-
-    if (type) {
-      query.where('type', type)
-    }
-
-    if (status) {
-      query.where('status', status)
-    }
-
-    const residences = await query
-    return residences
+    return query
   }
+
 
   /**
    * POST /api/residences

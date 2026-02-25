@@ -4,14 +4,28 @@ import Domain from "#models/domain";
 
 export default class DomainsController {
   // LIST
-  async index({ request }: HttpContext) {
+  async index({ request, auth }: HttpContext) {
+    const user = auth.user
+
+    if (!user) {
+      return { message: 'Utilisateur non authentifié' }
+    }
+
     const projectId = request.input('project_id')
 
-    const query = Domain.query()
-
-    if (projectId) {
-      query.where('project_id', projectId)
+    // Projets accessibles
+    let allowedProjectIds: any
+    if (user.role === 'SUPERADMIN') {
+      allowedProjectIds = null
+    } else {
+      const allowedProjects = await user.related('allowedProjects').query()
+      allowedProjectIds = allowedProjects.map((p: any) => p.id)
     }
+
+    const query = Domain.query().orderBy('created_at', 'desc')
+
+    if (allowedProjectIds) query.whereIn('project_id', allowedProjectIds)
+    if (projectId) query.where('project_id', projectId)
 
     return query
   }

@@ -14,7 +14,7 @@ export default class PropertiesController {
    * GET /api/properties
    * Filtres : ?q=&type=&status=&residenceId=&minPrice=&maxPrice=&minSurface=&maxSurface=
    */
-  async index({ request }: HttpContext) {
+  async index({ request, auth }: HttpContext) {
     const {
       q,
       type,
@@ -25,44 +25,38 @@ export default class PropertiesController {
       minSurface,
       maxSurface,
     } = request.qs()
+    const user = auth.user
+
+    if (!user) {
+      return { message: 'Utilisateur non authentifié' }
+    }
+
+    // Projets accessibles
+    let allowedProjectIds: any
+    if (user.role === 'SUPERADMIN') {
+      allowedProjectIds = null
+    } else {
+      const allowedProjects = await user.related('allowedProjects').query()
+      allowedProjectIds = allowedProjects.map((p: any) => p.id)
+    }
 
     const query = Property.query()
       .preload('residence')
       .orderBy('created_at', 'desc')
 
-    if (q) {
-      query.whereILike('title', `%${q}%`)
-    }
+    if (allowedProjectIds) query.whereIn('project_id', allowedProjectIds)
+    if (q) query.whereILike('title', `%${q}%`)
+    if (type) query.where('type', type)
+    if (status) query.where('status', status)
+    if (residenceId) query.where('residence_id', Number(residenceId))
+    if (minPrice) query.where('price', '>=', Number(minPrice))
+    if (maxPrice) query.where('price', '<=', Number(maxPrice))
+    if (minSurface) query.where('surface', '>=', Number(minSurface))
+    if (maxSurface) query.where('surface', '<=', Number(maxSurface))
 
-    if (type) {
-      query.where('type', type)
-    }
-
-    if (status) {
-      query.where('status', status)
-    }
-
-    if (residenceId) {
-      query.where('residence_id', Number(residenceId))
-    }
-
-    if (minPrice) {
-      query.where('price', '>=', Number(minPrice))
-    }
-    if (maxPrice) {
-      query.where('price', '<=', Number(maxPrice))
-    }
-
-    if (minSurface) {
-      query.where('surface', '>=', Number(minSurface))
-    }
-    if (maxSurface) {
-      query.where('surface', '<=', Number(maxSurface))
-    }
-
-    const properties = await query
-    return properties
+    return query
   }
+
 
   /**
    * POST /api/properties

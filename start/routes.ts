@@ -158,6 +158,7 @@ router.group(() => {
   router.put('/:id', [DomainsController, 'update'])
   router.delete('/:id', [DomainsController, 'destroy'])
 }).prefix('api/domains')
+  .use(middleware.auth())
 
 router.group(() => {
   router.get('/', [AcquisitionsController, 'index'])
@@ -166,6 +167,7 @@ router.group(() => {
   // router.put('/:id', [DomainsController, 'update'])
   // router.delete('/:id', [DomainsController, 'destroy'])
 }).prefix('api/acquisition')
+  .use(middleware.auth())
 
 router.group(() => {
   // Contrats
