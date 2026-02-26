@@ -187,7 +187,7 @@ router.group(() => {
   router.patch('/contract-templates/:id/toggle', '#controllers/contract_templates_controller.toggle')
   router.get('/contract-templates/variables', '#controllers/contract_templates_controller.variables')
   router.delete('/contract-templates/:id', '#controllers/contract_templates_controller.destroy')
-}).prefix('/api').use(middleware.auth())
+}).prefix('/api').use(middleware.auth()) 
 
 // router.group(() => {
 //   router.get('/', [ContractsController, 'index'])
