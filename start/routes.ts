@@ -179,7 +179,7 @@ router.group(() => {
   router.get('/contracts/:id/download', '#controllers/contracts_controller.download')
   router.get('/contracts/:id/download-signed', '#controllers/contracts_controller.downloadSigned')
   router.delete('/contracts/:id', '#controllers/contracts_controller.destroy')
-}).use(middleware.auth())
+}).prefix('/api').use(middleware.auth())
 
 router.group(() => {
   router.get('/projects/:projectId/contract-templates', '#controllers/contract_templates_controller.index')
@@ -187,7 +187,7 @@ router.group(() => {
   router.patch('/contract-templates/:id/toggle', '#controllers/contract_templates_controller.toggle')
   router.get('/contract-templates/variables', '#controllers/contract_templates_controller.variables')
   router.delete('/contract-templates/:id', '#controllers/contract_templates_controller.destroy')
-}).use(middleware.auth())
+}).prefix('/api').use(middleware.auth())
 
 // router.group(() => {
 //   router.get('/', [ContractsController, 'index'])
