@@ -48,6 +48,23 @@ export default class ContractGeneratorService {
   buildVariables(acquisition: any): Record<string, any> {
     const now = DateTime.now().setLocale('fr')
 
+    // Extraire le code de l'unité (avant le " - ")
+    const propertyCode = acquisition.property?.title?.split(' - ')[0]?.trim() ?? ''
+
+    // Code court de la structure
+    const structureCode: Record<string, string> = {
+      'Reliance West Africa': 'RWA',
+      'SONATUR': 'SONATUR',
+    }
+    const structure = acquisition.structureName ?? ''
+    const structureShort = structureCode[structure] ?? structure.toUpperCase().replace(/\s/g, '')
+
+    // Référence contrat
+    const year = new Date().getFullYear()
+    const projectCode = acquisition.property?.project?.name?.toUpperCase().replace(/\s/g, '') ?? ''
+    const reference = `${projectCode}/RES/${year}/${propertyCode}/${structureShort}`
+
+
     return {
       // Client
       CLIENT_NOM: acquisition.client?.lastName?.toUpperCase() ?? '',
@@ -84,6 +101,11 @@ export default class ContractGeneratorService {
       DATE_JOUR_COURT: now.toFormat('dd/MM/yyyy'),
       ANNEE: now.toFormat('yyyy'),
       MOIS: now.toFormat('MMMM'),
+
+      PROPRIETE_CODE: propertyCode,
+      REFERENCE_CONTRAT: reference,
+      STRUCTURE_NOM: structure,
+      STRUCTURE_CODE: structureShort,
     }
   }
 }

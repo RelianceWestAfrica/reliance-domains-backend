@@ -132,6 +132,11 @@ export default class ContractTemplateService {
       DATE_JOUR_COURT: 'Date du jour (format court)',
       ANNEE: 'Année en cours',
       MOIS: 'Mois en cours',
+
+      PROPRIETE_CODE: 'Code de l\'unité (ex: A0101, B0203)',
+      REFERENCE_CONTRAT: 'Référence complète du contrat (ex: ZAFARAPLAZZA/RES/2026/A0101/RWA)',
+      STRUCTURE_NOM: 'Nom de la structure procédant à l\'opération',
+      STRUCTURE_CODE: 'Code court de la structure (ex: RWA, SONATUR)',
     }
   }
 

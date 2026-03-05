@@ -182,6 +182,12 @@ router.group(() => {
 }).prefix('/api').use(middleware.auth())
 
 router.group(() => {
+  router.get('/structures', '#controllers/structures_controller.index')
+  router.post('/structures', '#controllers/structures_controller.store')
+  router.delete('/structures/:id', '#controllers/structures_controller.destroy')
+}).prefix('/api').use(middleware.auth())
+
+router.group(() => {
   router.get('/projects/:projectId/contract-templates', '#controllers/contract_templates_controller.index')
   router.post('/projects/:projectId/contract-templates', '#controllers/contract_templates_controller.store')
   router.patch('/contract-templates/:id/toggle', '#controllers/contract_templates_controller.toggle')
