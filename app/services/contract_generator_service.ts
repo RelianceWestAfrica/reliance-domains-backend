@@ -45,8 +45,60 @@ export default class ContractGeneratorService {
     return `contracts/generated/${outputFileName}`
   }
 
+  private numberToWords(n: number): string {
+  const units = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf',
+    'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf']
+  const tens = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt']
+
+  if (n === 0) return 'zéro'
+  if (n < 0) return 'moins ' + this.numberToWords(-n)
+
+  let result = ''
+
+  if (n >= 1_000_000_000) {
+    result += this.numberToWords(Math.floor(n / 1_000_000_000)) + ' milliard '
+    n %= 1_000_000_000
+  }
+  if (n >= 1_000_000) {
+    result += this.numberToWords(Math.floor(n / 1_000_000)) + ' million '
+    n %= 1_000_000
+  }
+  if (n >= 1_000) {
+    const thousands = Math.floor(n / 1_000)
+    result += (thousands === 1 ? 'mille ' : this.numberToWords(thousands) + ' mille ')
+    n %= 1_000
+  }
+  if (n >= 100) {
+    const hundreds = Math.floor(n / 100)
+    result += (hundreds === 1 ? 'cent ' : units[hundreds] + ' cent ')
+    n %= 100
+  }
+  if (n >= 20) {
+    const ten = Math.floor(n / 10)
+    const unit = n % 10
+    if (ten === 7 || ten === 9) {
+      result += tens[ten] + '-' + units[10 + unit] + ' '
+    } else if (ten === 8) {
+      result += (unit === 0 ? 'quatre-vingts ' : 'quatre-vingt-' + units[unit] + ' ')
+    } else {
+      result += tens[ten] + (unit > 0 ? (unit === 1 && ten !== 8 ? '-et-un ' : '-' + units[unit] + ' ') : ' ')
+    }
+  } else if (n > 0) {
+    result += units[n] + ' '
+  }
+
+  return result.trim()
+}
+
   buildVariables(acquisition: any): Record<string, any> {
     const now = DateTime.now().setLocale('fr')
+
+    const prix = acquisition.property?.price ?? 0
+    const prixFormate = new Intl.NumberFormat('fr-FR').format(prix)
+    const prixLettres = this.numberToWords(prix)
+
+    // Capitaliser première lettre
+    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
     // Extraire le code de l'unité (avant le " - ")
     const propertyCode = acquisition.property?.title?.split(' - ')[0]?.trim() ?? ''
@@ -66,7 +118,8 @@ export default class ContractGeneratorService {
 
     // Résidence et étage depuis la propriété
     const residence = acquisition.property?.residence
-    const floor = acquisition.property?.floor
+    // const floor = acquisition.property?.floor
+    const floor = acquisition.property?.residenceFloor
 
     // Extraire le bâtiment (avant le " - " du titre de la résidence)
     const batiment = residence?.title?.split(' - ')[0]?.trim() ?? ''
@@ -99,9 +152,9 @@ export default class ContractGeneratorService {
       PROPRIETE_TITRE: acquisition.property?.title ?? '',
       PROPRIETE_TYPE: acquisition.property?.type ?? '',
       PROPRIETE_SURFACE: acquisition.property?.surface ?? '',
-      PROPRIETE_PRIX: new Intl.NumberFormat('fr-FR').format(acquisition.property?.price ?? 0),
-      PROPRIETE_PRIX_LETTRES: acquisition.property?.price ?? '',
-      PROPRIETE_ETAGE: acquisition.property?.floor?.name ?? '',
+      PROPRIETE_PRIX: `${prixFormate} FCFA`,
+      PROPRIETE_PRIX_LETTRES: `${capitalize(prixLettres)} (${prixFormate}) FCFA`,
+      PROPRIETE_ETAGE: acquisition.property?.residenceFloor?.name ?? '',
       PROPRIETE_RESIDENCE: acquisition.property?.residence?.title ?? '',
       PROPRIETE_NB_PIECES: acquisition.property?.roomsCount ?? '',
 
@@ -112,8 +165,12 @@ export default class ContractGeneratorService {
 
       // Acquisition
       MONTANT_ACQUISITION: new Intl.NumberFormat('fr-FR').format(acquisition.amount ?? 0),
-      COMMERCIAL: acquisition.commercialName ?? '',
-      DATE_ACQUISITION: DateTime.fromISO(acquisition.dateAcquisition).setLocale('fr').toFormat('dd MMMM yyyy'),
+      // COMMERCIAL: acquisition.commercialName ?? '',
+      COMMERCIAL: acquisition.agent ?? acquisition.commercialName ?? '',
+      // DATE_ACQUISITION: DateTime.fromISO(acquisition.dateAcquisition).setLocale('fr').toFormat('dd MMMM yyyy'),
+      DATE_ACQUISITION: acquisition.dateAcquisition
+        ? DateTime.fromISO(acquisition.dateAcquisition).setLocale('fr').toFormat('dd MMMM yyyy')
+        : now.toFormat('dd MMMM yyyy'),
 
       // Date du jour
       DATE_JOUR: now.toFormat('dd MMMM yyyy'),
@@ -133,7 +190,7 @@ export default class ContractGeneratorService {
       CLIENT_PROFESSION: profession,
       CLIENT_IDENTITE: acquisition.client?.identityNumber ?? '',
       BATIMENT: batiment,
-      ETAGE: etage,
+      ETAGE: acquisition.property?.residenceFloor?.name ?? '',
 
     }
   }

@@ -65,7 +65,7 @@ export default class ContractsController {
       .where('id', acquisitionId)
       .preload('client')
       .preload('property', q => {
-        q.preload('floor')
+        q.preload('residenceFloor')
         q.preload('residence')
         q.preload('project', (p: any) => p.preload('country'))
       })

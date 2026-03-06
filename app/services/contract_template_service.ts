@@ -107,15 +107,23 @@ export default class ContractTemplateService {
       CLIENT_ADRESSE: 'Adresse du client',
       CLIENT_NATIONALITE: 'Nationalité du client',
       CLIENT_GENRE: 'Genre du client',
+      CLIENT_DATE_NAISSANCE: 'Date de naissance du client',
+      CLIENT_LIEU_NAISSANCE: 'Lieu de naissance du client',
+      CLIENT_DATE_LIEU_NAISSANCE: 'Date et lieu de naissance combinés',
+      CLIENT_PROFESSION: 'Profession du client',
+      CLIENT_IDENTITE: 'N° Pièce d\'identité ou RCCM du client',
 
       // Propriété
-      PROPRIETE_TITRE: 'Titre de la propriété',
-      PROPRIETE_TYPE: 'Type de propriété (APARTMENT, VILLA, SHOP)',
+      PROPRIETE_CODE: 'Code de l\'unité (ex: A0101, B0203)',
+      PROPRIETE_TITRE: 'Titre complet de la propriété',
+      PROPRIETE_TYPE: 'Type de propriété (APARTMENT, VILLA, SHOP...)',
       PROPRIETE_SURFACE: 'Surface en m²',
-      PROPRIETE_PRIX: 'Prix formaté en FCFA',
-      PROPRIETE_ETAGE: 'Nom de l\'étage',
-      PROPRIETE_RESIDENCE: 'Nom de la résidence',
+      PROPRIETE_ETAGE: 'Étage de la propriété (palier)',
+      PROPRIETE_PRIX: 'Prix formaté en FCFA (ex: 247 950 000 FCFA)',
+      PROPRIETE_PRIX_LETTRES: 'Prix en toutes lettres + chiffres (ex: Deux cent... (247 950 000) FCFA)',
       PROPRIETE_NB_PIECES: 'Nombre de pièces',
+      BATIMENT: 'Bâtiment — extrait du titre de la résidence (avant le " - ")',
+      ETAGE: 'Nom de l\'étage / palier',
 
       // Projet
       PROJET_NOM: 'Nom du projet',
@@ -123,29 +131,20 @@ export default class ContractTemplateService {
       PROJET_PAYS: 'Pays du projet',
 
       // Acquisition
-      MONTANT_ACQUISITION: 'Montant de l\'acquisition formaté',
-      COMMERCIAL: 'Nom du commercial',
-      DATE_ACQUISITION: 'Date de l\'acquisition (format long)',
-
-      // Dates
-      DATE_JOUR: 'Date du jour (format long)',
-      DATE_JOUR_COURT: 'Date du jour (format court)',
-      ANNEE: 'Année en cours',
-      MOIS: 'Mois en cours',
-
-      PROPRIETE_CODE: 'Code de l\'unité (ex: A0101, B0203)',
-      REFERENCE_CONTRAT: 'Référence complète du contrat (ex: ZAFARAPLAZZA/RES/2026/A0101/RWA)',
-      STRUCTURE_NOM: 'Nom de la structure procédant à l\'opération',
+      MONTANT_ACQUISITION: 'Montant versé lors de l\'acquisition (formaté)',
+      COMMERCIAL: 'Nom du commercial / agent',
+      DATE_ACQUISITION: 'Date de l\'acquisition (format long ex: 11 février 2026)',
+      STRUCTURE_NOM: 'Nom complet de la structure procédant à l\'opération',
       STRUCTURE_CODE: 'Code court de la structure (ex: RWA, SONATUR)',
 
-      CLIENT_DATE_NAISSANCE: 'Date de naissance du client',
-      CLIENT_LIEU_NAISSANCE: 'Lieu de naissance du client',
-      CLIENT_DATE_LIEU_NAISSANCE: 'Date et lieu de naissance combinés',
-      CLIENT_PROFESSION: 'Profession du client',
-      CLIENT_IDENTITE: 'N° Pièce d\'identité ou RCCM du client',
-      BATIMENT: 'Bâtiment (extrait du titre de la résidence)',
-      ETAGE: 'Nom de l\'étage / palier',
+      // Référence
+      REFERENCE_CONTRAT: 'Référence complète du contrat (ex: ZAFARAPLAZZA/RES/2026/A0101/RWA)',
 
+      // Dates
+      DATE_JOUR: 'Date du jour format long (ex: 5 mars 2026)',
+      DATE_JOUR_COURT: 'Date du jour format court (ex: 05/03/2026)',
+      ANNEE: 'Année en cours (ex: 2026)',
+      MOIS: 'Mois en cours (ex: mars)',
     }
   }
 
