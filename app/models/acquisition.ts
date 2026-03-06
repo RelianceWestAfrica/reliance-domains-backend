@@ -40,6 +40,9 @@ export default class Acquisition extends BaseModel {
   @column.date()
   public dateAcquisition
 
+  @column()
+  declare structureName: string | null
+
   /* ================= RELATIONS ================= */
 
   @belongsTo(() => Property)

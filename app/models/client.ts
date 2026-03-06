@@ -26,5 +26,17 @@ export default class Client extends BaseModel {
   public nationality!: string
 
   @column()
+  declare birthDate: Date | null
+
+  @column()
+  declare birthPlace: string | null
+
+  @column()
+  declare profession: string | null
+
+  @column()
+  declare identityNumber: string | null
+
+  @column()
   public acquisitions!: number
 }

@@ -32,6 +32,10 @@ export default class ClientsController {
       phone: payload.phone ?? null,
       address: payload.address ?? null,
       nationality: payload.nationality ?? null,
+      birthDate: payload.birth_date ?? null,
+      birthPlace: payload.birth_place ?? null,
+      profession: payload.profession ?? null,
+      identityNumber: payload.identity_number ?? null,
     })
 
     return response.created(client)
@@ -69,6 +73,10 @@ export default class ClientsController {
       phone: payload.phone ?? client.phone,
       address: payload.address ?? client.address,
       nationality: payload.nationality ?? client.nationality,
+      birthDate: payload.birth_date ?? client.birthDate,
+      birthPlace: payload.birth_place ?? client.birthPlace,
+      profession: payload.profession ?? client.profession,
+      identityNumber: payload.identity_number ?? client.identityNumber,
     })
 
     await client.save()

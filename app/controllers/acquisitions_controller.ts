@@ -3,6 +3,7 @@
 
 import Acquisition from "#models/acquisition";
 import Property from "#models/property";
+import Client from "#models/client";
 import { updatePropertyValidator } from '#validators/property'
 import type {HttpContext} from "@adonisjs/core/http";
 
@@ -52,6 +53,7 @@ export default class AcquisitionsController {
       'payment_type',
       'status',
       'date',
+      'structure_name',
       // 'contract'
     ])
 
@@ -63,6 +65,7 @@ export default class AcquisitionsController {
       paymentType: data.payment_type,
       status: data.status,
       dateAcquisition: data.date,
+      structureName: data.structure_name,
       // contract: data.contract
     })
 
@@ -72,6 +75,11 @@ export default class AcquisitionsController {
     property.merge({
       status: data.status,
     })
+
+    // Incrémenter le compteur du client
+    const client = await Client.findOrFail(data.client_id)
+    client.acquisitions = (client.acquisitions ?? 0) + 1
+    await client.save()
 
     await property.save()
 
@@ -83,16 +91,22 @@ export default class AcquisitionsController {
 
   public async destroy({ params, response }: HttpContext) {
     const acquisition = await Acquisition.findOrFail(params.id)
-    await acquisition.delete()
+
+    // Décrémenter le compteur du client
+    const client = await Client.findOrFail(acquisition.clientId)
+    if (client.acquisitions > 0) {
+      client.acquisitions = client.acquisitions - 1
+      await client.save()
+    }
+
+    // Remettre la propriété en AVAILABLE
     const property = await Property.findOrFail(acquisition.propertyId)
-    // const payload = await request.validateUsing(updatePropertyValidator)
-
-    property.merge({
-      status: 'AVAILABLE',
-    })
-
+    property.status = 'AVAILABLE'
     await property.save()
-    return response.noContent()
+
+    await acquisition.delete()
+
+    return response.json({ message: 'Acquisition supprimée' })
   }
 
 }

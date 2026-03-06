@@ -64,6 +64,25 @@ export default class ContractGeneratorService {
     const projectCode = acquisition.property?.project?.name?.toUpperCase().replace(/\s/g, '') ?? ''
     const reference = `${projectCode}/RES/${year}/${propertyCode}/${structureShort}`
 
+    // Résidence et étage depuis la propriété
+    const residence = acquisition.property?.residence
+    const floor = acquisition.property?.floor
+
+    // Extraire le bâtiment (avant le " - " du titre de la résidence)
+    const batiment = residence?.title?.split(' - ')[0]?.trim() ?? ''
+
+    // Étage
+    const etage = floor?.name ?? ''
+
+    // Client — nouveaux champs
+    const birthDate = acquisition.client?.birthDate
+      ? new Date(acquisition.client.birthDate).toLocaleDateString('fr-FR', {
+          day: 'numeric', month: 'long', year: 'numeric'
+        })
+      : ''
+    const birthPlace = acquisition.client?.birthPlace ?? ''
+    const profession = acquisition.client?.profession ?? ''
+
 
     return {
       // Client
@@ -106,6 +125,16 @@ export default class ContractGeneratorService {
       REFERENCE_CONTRAT: reference,
       STRUCTURE_NOM: structure,
       STRUCTURE_CODE: structureShort,
+
+      // Ajoute dans l'objet variables :
+      CLIENT_DATE_NAISSANCE: birthDate,
+      CLIENT_LIEU_NAISSANCE: birthPlace,
+      CLIENT_DATE_LIEU_NAISSANCE: birthDate && birthPlace ? `${birthDate} à ${birthPlace}` : birthDate || birthPlace,
+      CLIENT_PROFESSION: profession,
+      CLIENT_IDENTITE: acquisition.client?.identityNumber ?? '',
+      BATIMENT: batiment,
+      ETAGE: etage,
+
     }
   }
 }

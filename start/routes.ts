@@ -188,12 +188,18 @@ router.group(() => {
 }).prefix('/api').use(middleware.auth())
 
 router.group(() => {
+  router.get('/property-types', '#controllers/property_types_controller.index')
+  router.post('/property-types', '#controllers/property_types_controller.store')
+  router.delete('/property-types/:id', '#controllers/property_types_controller.destroy')
+}).prefix('/api').use(middleware.auth())
+
+router.group(() => {
   router.get('/projects/:projectId/contract-templates', '#controllers/contract_templates_controller.index')
   router.post('/projects/:projectId/contract-templates', '#controllers/contract_templates_controller.store')
   router.patch('/contract-templates/:id/toggle', '#controllers/contract_templates_controller.toggle')
   router.get('/contract-templates/variables', '#controllers/contract_templates_controller.variables')
   router.delete('/contract-templates/:id', '#controllers/contract_templates_controller.destroy')
-}).prefix('/api').use(middleware.auth()) 
+}).prefix('/api').use(middleware.auth())
 
 // router.group(() => {
 //   router.get('/', [ContractsController, 'index'])

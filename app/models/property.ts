@@ -14,8 +14,11 @@ export default class Property extends BaseModel {
   @column()
   declare title: string
 
+  // @column()
+  // declare type: 'APARTMENT' | 'VILLA' | 'SHOP' | 'OFFICE' | 'OTHER'
+
   @column()
-  declare type: 'APARTMENT' | 'VILLA' | 'SHOP' | 'OFFICE' | 'OTHER'
+  declare type: string
 
   /**
    * FK Residence (nullable)

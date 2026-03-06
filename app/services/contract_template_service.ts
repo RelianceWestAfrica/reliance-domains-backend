@@ -137,6 +137,15 @@ export default class ContractTemplateService {
       REFERENCE_CONTRAT: 'Référence complète du contrat (ex: ZAFARAPLAZZA/RES/2026/A0101/RWA)',
       STRUCTURE_NOM: 'Nom de la structure procédant à l\'opération',
       STRUCTURE_CODE: 'Code court de la structure (ex: RWA, SONATUR)',
+
+      CLIENT_DATE_NAISSANCE: 'Date de naissance du client',
+      CLIENT_LIEU_NAISSANCE: 'Lieu de naissance du client',
+      CLIENT_DATE_LIEU_NAISSANCE: 'Date et lieu de naissance combinés',
+      CLIENT_PROFESSION: 'Profession du client',
+      CLIENT_IDENTITE: 'N° Pièce d\'identité ou RCCM du client',
+      BATIMENT: 'Bâtiment (extrait du titre de la résidence)',
+      ETAGE: 'Nom de l\'étage / palier',
+
     }
   }
 

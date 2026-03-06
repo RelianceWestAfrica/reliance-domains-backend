@@ -4,7 +4,7 @@ import vine from '@vinejs/vine'
 export const createPropertyValidator = vine.compile(
   vine.object({
     title: vine.string().trim().minLength(3),
-    type: vine.enum(['APARTMENT', 'VILLA', 'SHOP', 'OFFICE', 'OTHER'] as const),
+    type: vine.string().trim().maxLength(100),
 
     residenceId: vine.number().positive(),
     projectId: vine.number().positive(),
@@ -33,7 +33,7 @@ export const createPropertyValidator = vine.compile(
 export const updatePropertyValidator = vine.compile(
   vine.object({
     title: vine.string().trim().minLength(3).optional(),
-    type: vine.enum(['APARTMENT', 'VILLA', 'SHOP', 'OFFICE', 'OTHER'] as const).optional(),
+    type: vine.string().trim().maxLength(100).optional(),
 
     residenceId: vine.number().positive().optional(),
     projectId: vine.number().positive(),
