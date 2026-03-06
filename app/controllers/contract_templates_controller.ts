@@ -38,14 +38,27 @@ export default class ContractTemplatesController {
     }
 
     const service = new ContractTemplateService()
-    const template = await service.uploadTemplate(
-      Number(params.projectId),
-      type,
-      label,
-      file
-    )
 
-    return response.json(template)
+    try {
+      const template = await service.uploadTemplate(
+        Number(params.projectId),
+        type,
+        label,
+        file
+      )
+      return response.json(template)
+    } catch (err) {
+      console.error('Erreur upload template:', err)
+      return response.internalServerError({ message: err.message })
+    }
+    // const template = await service.uploadTemplate(
+    //   Number(params.projectId),
+    //   type,
+    //   label,
+    //   file
+    // )
+
+    // return response.json(template)
   }
 
   /**

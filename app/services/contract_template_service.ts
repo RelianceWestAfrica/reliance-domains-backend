@@ -16,7 +16,11 @@ export default class ContractTemplateService {
     file: MultipartFile
   ): Promise<ContractTemplate> {
 
-    // Créer le dossier de stockage des templates
+    // ← Vérifier AVANT le move
+    if (!file.isValid) {
+      throw new Error(file.errors.map(e => e.message).join(', '))
+    }
+
     const templateDir = app.makePath('storage', 'contract-templates', `project_${projectId}`)
     if (!fs.existsSync(templateDir)) {
       fs.mkdirSync(templateDir, { recursive: true })
@@ -26,23 +30,20 @@ export default class ContractTemplateService {
 
     await file.move(templateDir, { name: fileName })
 
+    // ← Vérifier APRÈS le move aussi
     if (!file.isValid) {
       throw new Error(file.errors.map(e => e.message).join(', '))
     }
 
     const relativePath = `contract-templates/project_${projectId}/${fileName}`
 
-    // Vérifier si un template du même type existe déjà pour ce projet
     const existing = await ContractTemplate.query()
       .where('project_id', projectId)
       .where('type', type)
       .first()
 
     if (existing) {
-      // Supprimer l'ancien fichier
       this.deleteFile(existing.docxPath)
-
-      // Mettre à jour
       existing.label = label
       existing.docxPath = relativePath
       existing.actif = true
@@ -50,7 +51,6 @@ export default class ContractTemplateService {
       return existing
     }
 
-    // Créer un nouveau template
     const template = await ContractTemplate.create({
       projectId,
       type,
