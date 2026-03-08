@@ -20,45 +20,41 @@ export default class ContractTemplatesController {
    * Upload d'un template .docx
    */
   async store({ params, request, response, auth }: HttpContext) {
-    const user = auth.user
-    if (!user) return response.unauthorized('Utilisateur non authentifié')
-
-    const file = request.file('template_file', {
-      extnames: ['docx'],
-      size: '20mb'
-    })
-
-    if (!file) return response.badRequest('Fichier .docx manquant')
-
-    const type = request.input('type')
-    const label = request.input('label')
-
-    if (!type || !label) {
-      return response.badRequest('Le type et le label sont obligatoires')
-    }
-
-    const service = new ContractTemplateService()
-
     try {
+      const user = auth.user
+      if (!user) return response.unauthorized('Utilisateur non authentifié')
+
+      const file = request.file('template_file', {
+        // extnames: ['docx'],
+        size: '20mb'
+      })
+
+      if (!file) return response.badRequest('Fichier .docx manquant')
+
+      const type = request.input('type')
+      const label = request.input('label')
+
+      if (!type || !label) {
+        return response.badRequest('Le type et le label sont obligatoires')
+      }
+
+      const service = new ContractTemplateService()
       const template = await service.uploadTemplate(
         Number(params.projectId),
         type,
         label,
         file
       )
-      return response.json(template)
-    } catch (err) {
-      console.error('Erreur upload template:', err)
-      return response.internalServerError({ message: err.message })
-    }
-    // const template = await service.uploadTemplate(
-    //   Number(params.projectId),
-    //   type,
-    //   label,
-    //   file
-    // )
 
-    // return response.json(template)
+      return response.json(template)
+
+    } catch (error) {
+      console.error('ERREUR UPLOAD TEMPLATE:', error)
+      return response.internalServerError({
+        message: error.message,
+        stack: error.stack
+      })
+    }
   }
 
   /**
