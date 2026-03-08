@@ -26,9 +26,10 @@ export default class ContractTemplateService {
       fs.mkdirSync(templateDir, { recursive: true })
     }
 
-    const fileName = `template_${type}_${Date.now()}.${file.extname}`
+    const fileName = `template_${type}_${Date.now()}.docx`
+    // ${file.extname}
 
-    await file.move(templateDir, { name: fileName })
+    await file.move(templateDir, { name: fileName, overwrite: true })
 
     // ← Vérifier APRÈS le move aussi
     if (!file.isValid) {
