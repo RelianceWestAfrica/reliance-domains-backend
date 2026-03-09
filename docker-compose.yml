@@ -18,6 +18,7 @@ services:
 #     - db
     volumes:
       - ./storage:/app/storage
+      
     restart: unless-stopped
 
   # Base Postgres (optionnelle)
