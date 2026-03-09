@@ -29,10 +29,17 @@ export default class ContractTemplateService {
     const fileName = `template_${type}_${Date.now()}.docx`
     // ${file.extname}
 
+    console.log('=== UPLOAD TEMPLATE DEBUG ===')
     console.log('templateDir:', templateDir)
     console.log('file.tmpPath:', file.tmpPath)
+    console.log('file.isValid:', file.isValid)
+    console.log('file.errors:', file.errors)
 
     await file.move(templateDir, { name: fileName, overwrite: true })
+
+    console.log('Après move - file.isValid:', file.isValid)
+    console.log('Après move - file.errors:', file.errors)
+    console.log('File exists after move:', fs.existsSync(path.join(templateDir, fileName)))
 
     // ← Vérifier APRÈS le move aussi
     if (!file.isValid) {
