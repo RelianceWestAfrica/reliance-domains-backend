@@ -16,6 +16,8 @@ services:
 #    depends_on:
     # Décommentez si vous utilisez Postgres/Redis
 #     - db
+    volumes:
+      - ./storage:/app/storage
     restart: unless-stopped
 
   # Base Postgres (optionnelle)
