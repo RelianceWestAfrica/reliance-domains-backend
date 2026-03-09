@@ -29,6 +29,9 @@ export default class ContractTemplateService {
     const fileName = `template_${type}_${Date.now()}.docx`
     // ${file.extname}
 
+    console.log('templateDir:', templateDir)
+    console.log('file.tmpPath:', file.tmpPath)
+
     await file.move(templateDir, { name: fileName, overwrite: true })
 
     // ← Vérifier APRÈS le move aussi
