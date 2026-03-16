@@ -32,7 +32,7 @@ export default class Property extends BaseModel {
   /**
    * FK Residence Floor (nullable)
    */
-  @column({ columnName: 'floor_id' })
+  @column({ columnName: 'residence_floor_id' })
   declare residenceFloorId: number | null
 
   @belongsTo(() => ResidenceFloor)
