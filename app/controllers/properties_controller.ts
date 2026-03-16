@@ -154,7 +154,12 @@ export default class PropertiesController {
   async update({ params, request, response }: HttpContext) {
     const property = await Property.findOrFail(params.id)
     const oldResidenceId: number | null = property.residenceId ?? null
+    console.log('body brut:', JSON.stringify(request.body()))
     const payload = await request.validateUsing(updatePropertyValidator)
+
+    console.log('=== UPDATE property', params.id, '===')
+    console.log('payload reçu:', JSON.stringify(payload))
+    console.log('residenceFloorId dans payload:', payload.residenceFloorId)
 
     if (payload.projectId) {
       await Project.findOrFail(payload.projectId)
@@ -186,6 +191,8 @@ export default class PropertiesController {
       isPublished: payload.isPublished,
     })
 
+    console.log('après merge, residenceFloorId:', property.residenceFloorId)
+    
     await property.save()
 
     // Sync nouvelle résidence
