@@ -1,10 +1,35 @@
 // app/controllers/residences_controller.ts
 import type { HttpContext } from '@adonisjs/core/http'
 import Residence from '#models/residence'
+import Property from '#models/property'
 import {
   createResidenceValidator,
   updateResidenceValidator,
 } from '#validators/residence'
+
+// ─── Helper : resynchronise unitsCount + floorsCount depuis les propriétés ────
+async function syncResidenceStats(residenceId: number) {
+  const residence = await Residence.find(residenceId)
+  if (!residence) return
+
+  const unitsResult = await Property.query()
+    .where('residence_id', residenceId)
+    .count('* as total')
+    .first()
+
+  const floorsResult = await Property.query()
+    .where('residence_id', residenceId)
+    .whereNotNull('residence_floor_id')
+    .countDistinct('residence_floor_id as total')
+    .first()
+
+  residence.unitsCount = Number((unitsResult as any).$extras.total) ?? 0
+  residence.floorsCount = Number((floorsResult as any).$extras.total) ?? 0
+
+  await residence.save()
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 
 export default class ResidencesController {
   /**
@@ -83,7 +108,7 @@ export default class ResidencesController {
   /**
    * PUT /api/residences/:id
    */
-  async update({ params, request }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     const residence = await Residence.findOrFail(params.id)
     const payload = await request.validateUsing(updateResidenceValidator)
 
@@ -92,16 +117,21 @@ export default class ResidencesController {
       type: payload.type ?? residence.type,
       domainId: payload.domainId ?? residence.domainId,
       description: payload.description ?? residence.description,
-      floorsCount: payload.floorsCount ?? residence.floorsCount,
-      unitsCount: payload.unitsCount ?? residence.unitsCount,
+      // floorsCount: payload.floorsCount ?? residence.floorsCount,
+      // unitsCount: payload.unitsCount ?? residence.unitsCount,
       imageUrl: payload.imageUrl ?? residence.imageUrl,
       status: payload.status ?? residence.status,
     })
 
     await residence.save()
+
+    await syncResidenceStats(residence.id)
+
+    await residence.refresh()
+
     await residence.load('domain')
 
-    return residence
+    return response.ok(residence)
   }
 
   /**
