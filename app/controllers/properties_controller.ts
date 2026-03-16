@@ -9,6 +9,34 @@ import {
 import Project from "#models/project";
 import ResidenceFloor from "#models/residence_floor";
 
+// ─── Helper : resynchronise unitsCount + floorsCount d'une résidence ──────────
+async function syncResidenceStats(residenceId: number | null | undefined) {
+  if (!residenceId) return
+
+  const residence = await Residence.find(residenceId)
+  if (!residence) return
+
+  // Nombre total de propriétés rattachées à cette résidence
+  const unitsCount = await Property.query()
+    .where('residence_id', residenceId)
+    .count('* as total')
+    .first()
+
+  // Nombre d'étages distincts (residence_floor_id) utilisés par ces propriétés
+  const floorsCount = await Property.query()
+    .where('residence_id', residenceId)
+    .whereNotNull('residence_floor_id')
+    .countDistinct('residence_floor_id as total')
+    .first()
+
+  residence.unitsCount = Number((unitsCount as any).$extras.total) ?? 0
+  residence.floorsCount = Number((floorsCount as any).$extras.total) ?? 0
+
+  await residence.save()
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+
 export default class PropertiesController {
   /**
    * GET /api/properties
@@ -95,6 +123,9 @@ export default class PropertiesController {
       isPublished: payload.publish ?? false,
     })
 
+    // Sync résidence
+    await syncResidenceStats(property.residenceId)
+
     await property.load((loader) => {
       loader.load('residence')
       loader.load('residenceFloor')
@@ -122,6 +153,7 @@ export default class PropertiesController {
    */
   async update({ params, request, response }: HttpContext) {
     const property = await Property.findOrFail(params.id)
+    const oldResidenceId: number | null = property.residenceId ?? null
     const payload = await request.validateUsing(updatePropertyValidator)
 
     if (payload.projectId) {
@@ -156,6 +188,14 @@ export default class PropertiesController {
 
     await property.save()
 
+    // Sync nouvelle résidence
+    await syncResidenceStats(property.residenceId)
+
+    // Si la résidence a changé, sync aussi l'ancienne
+    if (oldResidenceId && oldResidenceId !== (property.residenceId ?? null)) {
+      await syncResidenceStats(oldResidenceId)
+    }
+
     await property.load((loader) => {
       loader.load('residence')
       loader.load('residenceFloor')
@@ -171,7 +211,12 @@ export default class PropertiesController {
    */
   async destroy({ params, response }: HttpContext) {
     const property = await Property.findOrFail(params.id)
+    const residenceId = property.residenceId
+
     await property.delete()
+
+    // Sync résidence après suppression
+    await syncResidenceStats(residenceId)
 
     return response.noContent()
   }
