@@ -15,6 +15,8 @@ export const createClientValidator = vine.compile(
     birth_place: vine.string().trim().maxLength(255).optional(),
     profession: vine.string().trim().maxLength(255).optional(),
     identity_number: vine.string().trim().maxLength(255).optional(),
+    identity_type: vine.string().trim().maxLength(100).optional(),
+    identity_issued_at: vine.date().optional(),
   })
 )
 
@@ -33,5 +35,7 @@ export const updateClientValidator = vine.compile(
     birth_place: vine.string().trim().maxLength(255).optional(),
     profession: vine.string().trim().maxLength(255).optional(),
     identity_number: vine.string().trim().maxLength(255).optional(),
+    identity_type: vine.string().trim().maxLength(100).optional(),
+    identity_issued_at: vine.date().optional(),
   })
 )

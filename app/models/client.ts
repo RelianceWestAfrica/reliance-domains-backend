@@ -39,4 +39,10 @@ export default class Client extends BaseModel {
 
   @column()
   public acquisitions!: number
+
+  @column()
+  declare identityType: string | null
+
+  @column()
+  declare identityIssuedAt: Date | null
 }
