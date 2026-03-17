@@ -239,7 +239,7 @@ router.group(() => {
   router.get('/user/:userId', [PermissionsController, 'getUserPermissions'])
   router.post('/assign', [PermissionsController, 'assignProjects'])
   router.delete('/user/:userId/project/:projectId', [PermissionsController, 'removeProject'])
-}).prefix('api/permissions').use(middleware.auth())
+}).prefix('api/permissions').use(middleware.auth()) 
 
 
 
