@@ -1,8 +1,8 @@
-import {BaseModel, belongsTo, column, computed} from "@adonisjs/lucid/orm";
+import {BaseModel, belongsTo, column, hasOne, computed} from "@adonisjs/lucid/orm";
 import Property from "#models/property";
 import Client from "#models/client";
 import PaymentPlan from '#models/payment_plan'
-import type { HasOne } from '@adonisjs/lucid/types/relations'
+import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
 
 export type AcquisitionStatus =
   | 'UNDER_DISCUSSION'
