@@ -15,6 +15,9 @@ import DomainsController from "#controllers/domains_controller";
 import AcquisitionsController from "#controllers/acquisitions_controller";
 import PermissionsController from "#controllers/permissions_controller";
 import ContractsController from '#controllers/contracts_controller';
+import ProjectPaymentConfigsController from '#controllers/project_payment_configs_controller'
+import PaymentPlansController from '#controllers/payment_plans_controller'
+import PaymentInstallmentsController from '#controllers/payment_installments_controller'
 
 /**
  * Petit endpoint de test
@@ -199,6 +202,27 @@ router.group(() => {
   router.patch('/contract-templates/:id/toggle', '#controllers/contract_templates_controller.toggle')
   router.get('/contract-templates/variables', '#controllers/contract_templates_controller.variables')
   router.delete('/contract-templates/:id', '#controllers/contract_templates_controller.destroy')
+}).prefix('/api').use(middleware.auth())
+
+router.group(() => {
+  // ─── Payment Configs ────────────────────────────────────────────────────
+  router.get('/payment-configs/:projectId', [ProjectPaymentConfigsController, 'showByProject'])
+  router.post('/payment-configs', [ProjectPaymentConfigsController, 'store'])
+  router.put('/payment-configs/:projectId', [ProjectPaymentConfigsController, 'updateByProject'])
+
+  // ─── Payment Plans ──────────────────────────────────────────────────────
+  router.get('/payment-plans', [PaymentPlansController, 'index'])
+  router.get('/payment-plans/by-acquisition/:acquisitionId', [PaymentPlansController, 'showByAcquisition'])
+  router.get('/payment-plans/:id', [PaymentPlansController, 'show'])
+  router.post('/payment-plans', [PaymentPlansController, 'store'])
+  router.put('/payment-plans/:id', [PaymentPlansController, 'update'])
+  router.delete('/payment-plans/:id', [PaymentPlansController, 'destroy'])
+
+  // ─── Installments ───────────────────────────────────────────────────────
+  router.put('/installments/:id', [PaymentInstallmentsController, 'update'])
+  router.post('/installments/:id/receipts', [PaymentInstallmentsController, 'addReceipt'])
+  router.delete('/installments/receipts/:receiptId', [PaymentInstallmentsController, 'deleteReceipt'])
+
 }).prefix('/api').use(middleware.auth())
 
 // router.group(() => {

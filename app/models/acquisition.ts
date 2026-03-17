@@ -1,7 +1,8 @@
 import {BaseModel, belongsTo, column, computed} from "@adonisjs/lucid/orm";
 import Property from "#models/property";
 import Client from "#models/client";
-
+import PaymentPlan from '#models/payment_plan'
+import type { HasOne } from '@adonisjs/lucid/types/relations'
 
 export type AcquisitionStatus =
   | 'UNDER_DISCUSSION'
@@ -51,6 +52,9 @@ export default class Acquisition extends BaseModel {
   @belongsTo(() => Client)
   public client
 
+  @hasOne(() => PaymentPlan, { foreignKey: 'acquisitionId' })
+  declare paymentPlan: HasOne<typeof PaymentPlan>
+
   /* ================= COMPUTED ================= */
 
   @computed()
@@ -71,4 +75,6 @@ export default class Acquisition extends BaseModel {
   public get paymentLabel() {
     return this.paymentType === 'TOTAL' ? 'Total' : 'Avance'
   }
+
+
 }
