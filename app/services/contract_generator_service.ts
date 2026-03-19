@@ -24,6 +24,23 @@ export default class ContractGeneratorService {
 
     // Remplir les variables dans le template
     const zip = new PizZip(content)
+
+    // ── Nettoyer le XML pour fusionner les tags fragmentés par Word ──
+    const xmlFiles = ['word/document.xml', 'word/header1.xml', 'word/footer1.xml']
+    for (const xmlFile of xmlFiles) {
+      if (zip.files[xmlFile]) {
+        let xml = zip.files[xmlFile].asText()
+        // Fusionne les {{ ... }} fragmentés à travers des balises XML
+        xml = xml.replace(/\{\{((?:[^}]|<[^>]*>)*?)\}\}/gs, (_match: string, inner: string) => {
+          const cleaned = inner.replace(/<[^>]+>/g, '').replace(/\s+/g, '')
+          return `{{${cleaned}}}`
+        })
+        zip.file(xmlFile, xml)
+      }
+    }
+    // ── Fin nettoyage ────────────────────────────────────────────────
+
+
     const doc = new Docxtemplater(zip, {
       paragraphLoop: true,
       linebreaks: true,
