@@ -14,10 +14,10 @@ export default class PaymentPlanGeneratorService {
     const plan = await PaymentPlan.query()
       .where('id', planId)
       .preload('installments', q => q.orderBy('order', 'asc'))
-      .preload('acquisition', q => {
+      .preload('acquisition', (q: any) => {
         q.preload('client')
-        q.preload('property', pq => {
-          pq.preload('project', ppq => ppq.preload('country'))
+        q.preload('property', (pq: any) => {
+          pq.preload('project', (ppq: any) => ppq.preload('country'))
           pq.preload('residence')
           pq.preload('residenceFloor')
         })
