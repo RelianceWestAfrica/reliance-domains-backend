@@ -109,4 +109,64 @@ export default class AcquisitionsController {
     return response.json({ message: 'Acquisition supprimée' })
   }
 
+  public async show({ params }: HttpContext) {
+    const acquisition = await Acquisition.query()
+      .where('id', params.id)
+      .preload('property')
+      .preload('client')
+      .firstOrFail()
+
+    return {
+      id: acquisition.id,
+      property: acquisition.property,
+      client: acquisition.client,
+      commercialName: acquisition.agent,
+      amount: acquisition.amount,
+      amountType: acquisition.paymentType === 'TOTAL' ? 'Total' : 'Avance',
+      status: this.mapStatus(acquisition.status),
+      dateAcquisition: acquisition.dateAcquisition,
+      structureName: acquisition.structureName,
+    }
+  }
+
+  public async update({ params, request, response }: HttpContext) {
+    const acquisition = await Acquisition.findOrFail(params.id)
+
+    const data = request.only([
+      'property_id',
+      'client_id',
+      'agent',
+      'amount',
+      'payment_type',
+      'status',
+      'date',
+      'structure_name',
+    ])
+
+    acquisition.merge({
+      propertyId: data.property_id ?? acquisition.propertyId,
+      clientId: data.client_id ?? acquisition.clientId,
+      agent: data.agent ?? acquisition.agent,
+      amount: data.amount ?? acquisition.amount,
+      paymentType: data.payment_type ?? acquisition.paymentType,
+      status: data.status ?? acquisition.status,
+      dateAcquisition: data.date ?? acquisition.dateAcquisition,
+      structureName: data.structure_name ?? acquisition.structureName,
+    })
+
+    await acquisition.save()
+
+    // Mettre à jour le statut de la propriété si changé
+    if (data.status) {
+      const property = await Property.findOrFail(acquisition.propertyId)
+      property.status = data.status
+      await property.save()
+    }
+
+    await acquisition.load('property')
+    await acquisition.load('client')
+
+    return response.ok(acquisition)
+  }
+
 }
