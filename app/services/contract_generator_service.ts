@@ -185,7 +185,7 @@ export default class ContractGeneratorService {
       // Acquisition
       // Acompte sur le projet
       ACOMPTE: new Intl.NumberFormat('fr-FR').format(depositAmount),
-      ACOMPTE_LETTRES: ContractGeneratorService.numberToWords(depositAmount),
+      ACOMPTE_LETTRES: this.numberToWords(depositAmount),
 
       MONTANT_ACQUISITION: new Intl.NumberFormat('fr-FR').format(acquisition.amount ?? 0),
       // COMMERCIAL: acquisition.commercialName ?? '',
