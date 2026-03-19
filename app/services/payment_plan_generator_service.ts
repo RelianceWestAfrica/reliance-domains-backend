@@ -53,6 +53,7 @@ export default class PaymentPlanGeneratorService {
     const doc = new Docxtemplater(zip, {
       paragraphLoop: true,
       linebreaks: true,
+      nullGetter: () => '',
     })
 
     const variables = PaymentPlanGeneratorService.buildVariables(plan)
