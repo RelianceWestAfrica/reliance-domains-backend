@@ -5,6 +5,8 @@ import PaymentInstallment from '#models/payment_installment'
 import Acquisition from '#models/acquisition'
 import ProjectPaymentConfig from '#models/project_payment_config'
 import PaymentPlanGeneratorService from '#services/payment_plan_generator_service'
+import fs from 'node:fs'
+import app from '@adonisjs/core/services/app'
 
 export default class PaymentPlansController {
 
@@ -217,5 +219,21 @@ export default class PaymentPlansController {
     }
 
     await PaymentInstallment.createMany(installments)
+  }
+
+  async download({ params, response }: HttpContext) {
+    const plan = await PaymentPlan.findOrFail(params.id)
+
+    if (!plan.docxUrl) {
+      return response.notFound({ message: 'Aucun document généré pour ce plan' })
+    }
+
+    const filePath = app.makePath(plan.docxUrl)
+
+    if (!fs.existsSync(filePath)) {
+      return response.notFound({ message: 'Fichier introuvable sur le serveur' })
+    }
+
+    return response.download(filePath)
   }
 }

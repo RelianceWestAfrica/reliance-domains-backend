@@ -220,12 +220,14 @@ router.group(() => {
   router.delete('/payment-plans/:id', [PaymentPlansController, 'destroy'])
   router.post('/payment-plans/:id/generate', [PaymentPlansController, 'generate'])
   router.get('/payment-plans/variables', [PaymentPlansController, 'variables'])
+  router.get('/payment-plans/:id/download', [PaymentPlansController, 'download'])
 
   // ─── Installments ───────────────────────────────────────────────────────
   router.put('/installments/:id', [PaymentInstallmentsController, 'update'])
   router.post('/installments/:id/receipts', [PaymentInstallmentsController, 'addReceipt'])
   router.delete('/installments/receipts/:receiptId', [PaymentInstallmentsController, 'deleteReceipt'])
-
+  router.get('/installments/receipts/:receiptId/view', [PaymentInstallmentsController, 'viewReceipt'])
+  
 }).prefix('/api').use(middleware.auth())
 
 // router.group(() => {

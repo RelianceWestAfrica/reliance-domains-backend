@@ -3,6 +3,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import PaymentInstallment from '#models/payment_installment'
 import InstallmentReceipt from '#models/installment_receipt'
 import PaymentPlan from '#models/payment_plan'
+import fs from 'node:fs'
+import app from '@adonisjs/core/services/app'
 
 export default class PaymentInstallmentsController {
 
@@ -98,5 +100,17 @@ export default class PaymentInstallmentsController {
       plan.status = 'COMPLETED'
       await plan.save()
     }
+  }
+
+  // GET /api/installments/receipts/:receiptId/view
+  async viewReceipt({ params, response }: HttpContext) {
+    const receipt = await InstallmentReceipt.findOrFail(params.receiptId)
+    const filePath = app.makePath(receipt.fileUrl.replace(/^\//, ''))
+
+    if (!fs.existsSync(filePath)) {
+      return response.notFound({ message: 'Fichier introuvable' })
+    }
+
+    return response.download(filePath)
   }
 }
