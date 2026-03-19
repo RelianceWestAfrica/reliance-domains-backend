@@ -221,14 +221,18 @@ export default class PaymentPlansController {
     await PaymentInstallment.createMany(installments)
   }
 
-  async download({ params, response }: HttpContext) {
+  async download({ params, response, auth }: HttpContext) {
+    const user = auth.user
+    if (!user) return response.unauthorized('Utilisateur non authentifié')
+
     const plan = await PaymentPlan.findOrFail(params.id)
 
     if (!plan.docxUrl) {
       return response.notFound({ message: 'Aucun document généré pour ce plan' })
     }
 
-    const filePath = app.makePath(plan.docxUrl)
+    // docxUrl est stocké comme "payment-plans/generated/plan_xxx.docx"
+    const filePath = app.makePath('storage', plan.docxUrl)
 
     if (!fs.existsSync(filePath)) {
       return response.notFound({ message: 'Fichier introuvable sur le serveur' })
