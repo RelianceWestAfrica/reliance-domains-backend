@@ -4,6 +4,7 @@ import PaymentPlan from '#models/payment_plan'
 import PaymentInstallment from '#models/payment_installment'
 import Acquisition from '#models/acquisition'
 import ProjectPaymentConfig from '#models/project_payment_config'
+import PaymentPlanGeneratorService from '#services/payment_plan_generator_service'
 
 export default class PaymentPlansController {
 
@@ -138,6 +139,21 @@ export default class PaymentPlansController {
     const plan = await PaymentPlan.findOrFail(params.id)
     await plan.delete()
     return response.noContent()
+  }
+
+  // POST /api/payment-plans/:id/generate
+  async generate({ params, response }: HttpContext) {
+    try {
+      const fileUrl = await PaymentPlanGeneratorService.generate(params.id)
+      return response.ok({ url: fileUrl })
+    } catch (e: any) {
+      return response.badRequest({ message: e.message })
+    }
+  }
+
+  // GET /api/payment-plans/variables
+  async variables({ response }: HttpContext) {
+    return response.ok(PaymentPlanGeneratorService.getAvailableVariables())
   }
 
   // ─── Helper : génère les échéances selon le mode ──────────────────────────

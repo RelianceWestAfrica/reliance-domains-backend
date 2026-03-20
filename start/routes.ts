@@ -217,6 +217,8 @@ router.group(() => {
   router.post('/payment-plans', [PaymentPlansController, 'store'])
   router.put('/payment-plans/:id', [PaymentPlansController, 'update'])
   router.delete('/payment-plans/:id', [PaymentPlansController, 'destroy'])
+  router.post('/payment-plans/:id/generate', [PaymentPlansController, 'generate'])
+  router.get('/payment-plans/variables', [PaymentPlansController, 'variables'])
 
   // ─── Installments ───────────────────────────────────────────────────────
   router.put('/installments/:id', [PaymentInstallmentsController, 'update'])
@@ -239,7 +241,7 @@ router.group(() => {
   router.get('/user/:userId', [PermissionsController, 'getUserPermissions'])
   router.post('/assign', [PermissionsController, 'assignProjects'])
   router.delete('/user/:userId/project/:projectId', [PermissionsController, 'removeProject'])
-}).prefix('api/permissions').use(middleware.auth()) 
+}).prefix('api/permissions').use(middleware.auth())
 
 
 
