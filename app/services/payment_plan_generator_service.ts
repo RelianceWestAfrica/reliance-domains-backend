@@ -73,6 +73,14 @@ export default class PaymentPlanGeneratorService {
     const floor = property?.residenceFloor
     const residence = property?.residence
 
+    // Code court de la structure
+    const structureCode: Record<string, string> = {
+      'Reliance West Africa': 'RWA',
+      'SONATUR': 'SONATUR',
+    }
+    const structure = plan.acquisition?.structureName ?? ''
+    const structureShort = structureCode[structure] ?? structure.toUpperCase().replace(/\s/g, '')
+
     const batiment = residence?.title?.split(' - ')[0]?.trim() ?? ''
     const etage = floor?.name ?? ''
 
@@ -96,6 +104,7 @@ export default class PaymentPlanGeneratorService {
       CLIENT_IDENTITE: client?.identityNumber ?? '',
 
       // Propriété
+      PROPRIETE_CODE: property?.title?.split(' - ')[0]?.trim() ?? '',
       PROPRIETE_TITRE: property?.title ?? '',
       PROPRIETE_TYPE: property?.type ?? '',
       PROPRIETE_SURFACE: property?.surface ? String(Math.round(Number(property.surface))) : '',
@@ -105,6 +114,8 @@ export default class PaymentPlanGeneratorService {
       // Projet
       PROJET_NOM: project?.title ?? '',
       PROJET_VILLE: project?.city ?? '',
+      STRUCTURE_NOM: structure,
+      STRUCTURE_CODE: structureShort,
 
       // Montants
       MONTANT_TOTAL: new Intl.NumberFormat('fr-FR').format(totalAmount),
@@ -209,6 +220,7 @@ export default class PaymentPlanGeneratorService {
     'CLIENT_IDENTITE': 'N° pièce d\'identité du client',
 
     // Propriété
+    'PROPRIETE_CODE': 'Code de l\'unité (ex: A0101, B0203)',
     'PROPRIETE_TITRE': 'Titre de la propriété',
     'PROPRIETE_TYPE': 'Type de la propriété',
     'PROPRIETE_SURFACE': 'Surface en m²',
@@ -218,6 +230,8 @@ export default class PaymentPlanGeneratorService {
     // Projet
     'PROJET_NOM': 'Nom du projet',
     'PROJET_VILLE': 'Ville du projet',
+    'STRUCTURE_NOM': 'Nom complet de la structure procédant à l\'opération',
+    'STRUCTURE_CODE': 'Code court de la structure (ex: RWA, SONATUR)',
 
     // Montants
     'MONTANT_TOTAL': 'Montant total en chiffres',
