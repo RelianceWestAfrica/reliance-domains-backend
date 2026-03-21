@@ -166,44 +166,55 @@ export default class PaymentPlanGeneratorService {
       .where('project_id', projectId)
       .firstOrFail()
 
-    let templateUrl: string | null = null
-    if (plan.mode === 'CASH') templateUrl = config.cashTemplateUrl
-    else if (plan.mode === 'PHASED') templateUrl = config.phasedTemplateUrl
-    else if (plan.mode === 'CUSTOM') templateUrl = config.customTemplateUrl
-
-    if (!templateUrl) {
-      throw new Error(`Aucun template .docx configuré pour le mode ${plan.mode} du projet`)
+    let templateRelativePath: string | null = null
+    if (plan.mode === 'CASH') templateRelativePath = config.cashTemplateUrl
+    else if (plan.mode === 'PHASED') templateRelativePath = config.phasedTemplateUrl
+    else if (plan.mode === 'CUSTOM') templateRelativePath = config.customTemplateUrl
+ 
+    if (!templateRelativePath) {
+      throw new Error(`Aucun template .docx configuré pour le mode ${plan.mode} de ce projet`)
     }
 
-    // Télécharger le template
-    const templateResponse = await axios.get(templateUrl, { responseType: 'arraybuffer' })
-    const templateBuffer = Buffer.from(templateResponse.data)
-
-    // Générer le document
-    const zip = new PizZip(templateBuffer)
+// Lire le template depuis le système de fichiers
+    const fullTemplatePath = app.makePath(templateRelativePath.replace(/^\//, ''))
+ 
+    if (!fs.existsSync(fullTemplatePath)) {
+      throw new Error(`Fichier template introuvable : ${fullTemplatePath}`)
+    }
+ 
+    const content = fs.readFileSync(fullTemplatePath, 'binary')
+ 
+    // Remplir les variables
+    const zip = new PizZip(content)
     const doc = new Docxtemplater(zip, {
       paragraphLoop: true,
       linebreaks: true,
     })
-
-    const variables = await PaymentPlanGeneratorService.buildVariables(plan)
+ 
+    const variables = PaymentPlanGeneratorService.buildVariables(plan)
     doc.render(variables)
-
-    const output = doc.getZip().generate({ type: 'nodebuffer' })
-
-    // Sauvegarder
-    const outputDir = path.join(process.cwd(), 'storage', 'payment-plans', 'generated')
-    if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
-
-    const fileName = `plan_paiement_${planId}_${Date.now()}.docx`
-    const filePath = path.join(outputDir, fileName)
-    fs.writeFileSync(filePath, output)
-
-    // Mettre à jour le plan avec l'URL
-    const fileUrl = `/storage/payment-plans/generated/${fileName}`
+ 
+    // Créer le dossier de sortie
+    const outputDir = app.makePath('storage', 'payment-plans', 'generated')
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true })
+    }
+ 
+    // Nom du fichier généré
+    const clientName = plan.acquisition?.client?.lastName?.toUpperCase() ?? 'CLIENT'
+    const modeName = plan.mode
+    const outputFileName = `plan_${modeName}_${clientName}_${Date.now()}.docx`
+    const outputPath = path.join(outputDir, outputFileName)
+ 
+    const buf = doc.getZip().generate({ type: 'nodebuffer' })
+    fs.writeFileSync(outputPath, buf)
+ 
+    const fileUrl = `storage/payment-plans/generated/${outputFileName}`
+ 
+    // Mettre à jour le plan avec l'URL du document généré
     plan.docxUrl = fileUrl
     await plan.save()
-
+ 
     return fileUrl
   }
 
