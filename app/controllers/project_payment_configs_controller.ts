@@ -66,4 +66,38 @@ export default class ProjectPaymentConfigsController {
     await config.load('project')
     return response.ok(config)
   }
+
+  // POST /api/payment-configs/:projectId/upload-template
+  async uploadTemplate({ params, request, response }: HttpContext) {
+    const config = await ProjectPaymentConfig.query()
+      .where('project_id', params.projectId)
+      .firstOrFail()
+
+    const file = request.file('template_file', { extnames: ['docx'], size: '20mb' })
+    const mode = request.input('mode') // CASH | PHASED | CUSTOM
+
+    if (!file) return response.badRequest({ message: 'Fichier manquant' })
+    if (!['CASH', 'PHASED', 'CUSTOM'].includes(mode)) {
+      return response.badRequest({ message: 'Mode invalide' })
+    }
+
+    const fileName = `template_${mode}_${Date.now()}.docx`
+    const uploadDir = `storage/payment-plan-templates/project_${params.projectId}`
+
+    await file.move(uploadDir, { name: fileName, overwrite: true })
+
+    if (file.state !== 'moved') {
+      return response.internalServerError({ message: 'Erreur lors du déplacement du fichier' })
+    }
+
+    const fileUrl = `/${uploadDir}/${fileName}`
+
+    if (mode === 'CASH') config.cashTemplateUrl = fileUrl
+    else if (mode === 'PHASED') config.phasedTemplateUrl = fileUrl
+    else if (mode === 'CUSTOM') config.customTemplateUrl = fileUrl
+
+    await config.save()
+
+    return response.ok({ url: fileUrl, mode })
+  }
 }

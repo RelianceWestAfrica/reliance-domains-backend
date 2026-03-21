@@ -209,6 +209,7 @@ router.group(() => {
   router.get('/payment-configs/:projectId', [ProjectPaymentConfigsController, 'showByProject'])
   router.post('/payment-configs', [ProjectPaymentConfigsController, 'store'])
   router.put('/payment-configs/:projectId', [ProjectPaymentConfigsController, 'updateByProject'])
+  router.post('/payment-configs/:projectId/upload-template', [ProjectPaymentConfigsController, 'uploadTemplate'])
 
   // ─── Payment Plans ──────────────────────────────────────────────────────
   router.get('/payment-plans', [PaymentPlansController, 'index'])
