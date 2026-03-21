@@ -42,12 +42,40 @@ export default class PaymentInstallmentsController {
   // POST /api/installments/:id/receipts — Upload facture
   async addReceipt({ params, request, response }: HttpContext) {
     const installment = await PaymentInstallment.findOrFail(params.id)
-    const body = request.body()
+
+    // Remonter jusqu'au projet via plan → acquisition → property → project
+    const plan = await PaymentPlan.query()
+      .where('id', installment.planId)
+      .preload('acquisition', (q) => {
+        q.preload('property', (pq) => pq.preload('project'))
+      })
+      .firstOrFail()
+
+    const projectName = plan.acquisition?.property?.project?.title
+      ?.replace(/\s+/g, '_')
+      .replace(/[^a-zA-Z0-9_-]/g, '')
+      ?? 'unknown_project'
+
+    const file = request.file('receipt_file', { size: '20mb' })
+    const originalName = request.input('original_name')
+
+    if (!file) return response.badRequest({ message: 'Fichier manquant' })
+
+    const fileName = `receipt_${installment.id}_${Date.now()}${file.extname ? '.' + file.extname : ''}`
+    const uploadDir = `storage/installment-receipts/${projectName}`
+
+    await file.move(uploadDir, { name: fileName, overwrite: true })
+
+    if (file.state !== 'moved') {
+      return response.internalServerError({ message: 'Erreur lors du déplacement du fichier' })
+    }
+
+    const fileUrl = `/${uploadDir}/${fileName}`
 
     const receipt = await InstallmentReceipt.create({
       installmentId: installment.id,
-      fileUrl: body.fileUrl,
-      originalName: body.originalName ?? null,
+      fileUrl,
+      originalName: originalName ?? file.clientName ?? null,
     })
 
     return response.created(receipt)
