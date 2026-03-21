@@ -136,6 +136,8 @@ export default class ContractGeneratorService {
     const birthPlace = acquisition.client?.birthPlace ?? ''
     const profession = acquisition.client?.profession ?? ''
 
+    const depositAmount = acquisition.property?.project?.depositAmount ?? 0
+
 
     return {
       // Client
@@ -164,6 +166,10 @@ export default class ContractGeneratorService {
       PROJET_PAYS: acquisition.property?.project?.country?.name ?? '',
 
       // Acquisition
+      // Acompte sur le projet
+      ACOMPTE: new Intl.NumberFormat('fr-FR').format(depositAmount),
+      ACOMPTE_LETTRES: ContractGeneratorService.numberToWords(depositAmount),
+
       MONTANT_ACQUISITION: new Intl.NumberFormat('fr-FR').format(acquisition.amount ?? 0),
       // COMMERCIAL: acquisition.commercialName ?? '',
       COMMERCIAL: acquisition.agent ?? acquisition.commercialName ?? '',

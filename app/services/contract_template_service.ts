@@ -142,6 +142,8 @@ export default class ContractTemplateService {
       PROJET_PAYS: 'Pays du projet',
 
       // Acquisition
+      ACOMPTE: "Montant de l'acompte en chiffres",
+      ACOMPTE_LETTRES: "Montant de l'acompte en lettres",
       MONTANT_ACQUISITION: 'Montant versé lors de l\'acquisition (formaté)',
       COMMERCIAL: 'Nom du commercial / agent',
       DATE_ACQUISITION: 'Date de l\'acquisition (format long ex: 11 février 2026)',
