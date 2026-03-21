@@ -166,9 +166,9 @@ router.group(() => {
 router.group(() => {
   router.get('/', [AcquisitionsController, 'index'])
   router.post('/', [AcquisitionsController, 'store'])
-  // router.get('/:id', [DomainsController, 'show'])
-  // router.put('/:id', [DomainsController, 'update'])
-  // router.delete('/:id', [DomainsController, 'destroy'])
+  router.get('/:id', [AcquisitionsController, 'show'])
+  router.put('/:id', [AcquisitionsController, 'update'])
+  router.delete('/:id', [AcquisitionsController, 'destroy'])
 }).prefix('api/acquisition')
   .use(middleware.auth())
 
