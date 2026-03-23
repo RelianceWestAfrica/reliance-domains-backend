@@ -168,11 +168,7 @@ export default class PaymentPlanGeneratorService {
       DATE_JOUR: now.toFormat('dd MMMM yyyy'),
       DATE_JOUR_COURT: now.toFormat('dd/MM/yyyy'),
       ANNEE: now.toFormat('yyyy'),
-      DATE_BUTOIR: plan.deadlineDate
-        ? new Date(plan.deadlineDate).toLocaleDateString('fr-FR', {
-            day: '2-digit', month: '2-digit', year: 'numeric'
-          })
-        : '',
+      DATE_BUTOIR: plan.deadlineDate ? DateTime.fromJSDate(new Date(plan.deadlineDate)).toFormat('dd/MM/yyyy') : '',
       REFERENCE_PLAN: referencePlan,
     }
 
