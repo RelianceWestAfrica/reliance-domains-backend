@@ -170,7 +170,7 @@ export default class ContractGeneratorService {
       // Propriété
       PROPRIETE_TITRE: acquisition.property?.title ?? '',
       PROPRIETE_TYPE: acquisition.property?.type ?? '',
-      PROPRIETE_SURFACE: acquisition.property?.surface ?? '',
+      PROPRIETE_SURFACE: acquisition.property?.surface ? String(Math.round(Number(acquisition.property?.surface))) : '',
       PROPRIETE_PRIX: `${prixFormate} FCFA`,
       PROPRIETE_PRIX_LETTRES: `${capitalize(prixLettres)} (${prixFormate}) FCFA`,
       PROPRIETE_ETAGE: acquisition.property?.residenceFloor?.name ?? '',
