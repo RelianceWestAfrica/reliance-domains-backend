@@ -24,12 +24,12 @@ export default class PaymentInstallmentsController {
     }
 
     installment.merge({
-      amountPaid,
-      status,
-      paidAt: body.paidAt ?? installment.paidAt,
-      paymentMethod: body.paymentMethod ?? installment.paymentMethod,
-      dueDate: body.dueDate ?? installment.dueDate,
-      notes: body.notes ?? installment.notes,
+      amountPaid: body.amountPaid ?? installment.amountPaid,
+      status: body.status ?? status,
+      paidAt: body.paidAt !== undefined ? body.paidAt : installment.paidAt,
+      paymentMethod: body.paymentMethod !== undefined ? body.paymentMethod : installment.paymentMethod,
+      dueDate: body.dueDate !== undefined ? body.dueDate : installment.dueDate,
+      notes: body.notes !== undefined ? body.notes : installment.notes,
     })
 
     await installment.save()

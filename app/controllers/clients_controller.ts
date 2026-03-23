@@ -1,6 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Client from '#models/client'
 import { createClientValidator, updateClientValidator } from '#validators/client'
+import fs from 'node:fs'
+import app from '@adonisjs/core/services/app'
 
 export default class ClientsController {
   /**
@@ -95,5 +97,49 @@ export default class ClientsController {
     const client = await Client.findOrFail(params.id)
     await client.delete()
     return response.noContent()
+  }
+
+  async uploadIdentityDocument({ params, request, response }: HttpContext) {
+    const client = await Client.findOrFail(params.id)
+
+    const file = request.file('identity_document', {
+      size: '10mb',
+      extnames: ['pdf', 'jpg', 'jpeg', 'png'],
+    })
+
+    if (!file) return response.badRequest({ message: 'Fichier manquant' })
+
+    const fileName = `identity_${client.id}_${Date.now()}.${file.extname}`
+    const uploadDir = `storage/clients/identity-documents`
+
+    await file.move(uploadDir, { name: fileName, overwrite: true })
+
+    if (file.state !== 'moved') {
+      return response.internalServerError({ message: 'Erreur lors du déplacement du fichier' })
+    }
+
+    client.identityDocumentPath = `${uploadDir}/${fileName}`
+    await client.save()
+
+    return response.ok({ path: client.identityDocumentPath })
+  }
+
+  async downloadIdentityDocument({ params, response, auth }: HttpContext) {
+    const user = auth.user
+    if (!user) return response.unauthorized('Non authentifié')
+
+    const client = await Client.findOrFail(params.id)
+
+    if (!client.identityDocumentPath) {
+      return response.notFound({ message: 'Aucune pièce d\'identité enregistrée' })
+    }
+
+    const filePath = app.makePath('storage', client.identityDocumentPath)
+
+    if (!fs.existsSync(filePath)) {
+      return response.notFound({ message: 'Fichier introuvable' })
+    }
+
+    return response.download(filePath)
   }
 }

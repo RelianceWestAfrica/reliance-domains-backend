@@ -45,4 +45,7 @@ export default class Client extends BaseModel {
 
   @column()
   declare identityIssuedAt: Date | null
+
+  @column()
+  declare identityDocumentPath: string | null
 }

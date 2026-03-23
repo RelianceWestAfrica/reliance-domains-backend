@@ -149,6 +149,8 @@ router
 router.group(() => {
   router.get('/', [ClientsController, 'index'])      // liste + filtres
   router.post('/', [ClientsController, 'store'])     // création
+  router.post('/:id/upload-identity', [ClientsController, 'uploadIdentityDocument'])
+  router.get('/:id/download-identity', [ClientsController, 'downloadIdentityDocument'])
   router.get('/:id', [ClientsController, 'show'])    // détail
   router.put('/:id', [ClientsController, 'update'])  // mise à jour
   router.delete('/:id', [ClientsController, 'destroy'])
