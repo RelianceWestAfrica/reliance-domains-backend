@@ -134,7 +134,7 @@ export default class ClientsController {
       return response.notFound({ message: 'Aucune pièce d\'identité enregistrée' })
     }
 
-    const filePath = app.makePath('storage', client.identityDocumentPath)
+    const filePath = app.makePath(client.identityDocumentPath)
 
     if (!fs.existsSync(filePath)) {
       return response.notFound({ message: 'Fichier introuvable' })
