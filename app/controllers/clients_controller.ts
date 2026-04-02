@@ -30,6 +30,7 @@ export default class ClientsController {
     const client = await Client.create({
       firstName: payload.firstName,
       lastName: payload.lastName,
+      gender:payload.gender ?? null,
       email: payload.email ?? null,
       phone: payload.phone ?? null,
       address: payload.address ?? null,
@@ -73,6 +74,7 @@ export default class ClientsController {
     client.merge({
       firstName: payload.firstName ?? client.firstName,
       lastName: payload.lastName ?? client.lastName,
+      gender: payload.gender ?? client.gender,
       email: payload.email ?? client.email,
       phone: payload.phone ?? client.phone,
       address: payload.address ?? client.address,
